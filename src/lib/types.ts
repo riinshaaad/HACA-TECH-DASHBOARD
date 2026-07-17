@@ -32,6 +32,7 @@ export interface KPIData {
   topCourse: string;
   topDistrict: string;
   topLeadSource: string;
+  topMonth: string;
   aiInfluencePercentage: number;
 }
 
@@ -70,4 +71,10 @@ export interface FilterState {
   course: string;
   district: string;
   currentStatus: string;
+  month: string;
+}
+
+export interface MonthOption {
+  label: string;
+  value: string;
 }

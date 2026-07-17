@@ -7,6 +7,7 @@ import {
   CompetitorRank,
   Insight,
   FilterState,
+  MonthOption,
 } from "./types";
 
 const CHART_COLORS = [
@@ -34,6 +35,16 @@ export function applyFilters(
       d.currentStatus !== filters.currentStatus
     )
       return false;
+    if (filters.month !== "All") {
+      if (!d.enrollmentDate) return false;
+      const parts = d.enrollmentDate.split("/");
+      if (parts.length === 3) {
+        const monthYear = `${parts[2]}-${parts[1]}`;
+        if (monthYear !== filters.month) return false;
+      } else {
+        return false;
+      }
+    }
     return true;
   });
 }
@@ -46,6 +57,7 @@ export function computeKPIs(data: EnrollmentData[]): KPIData {
       topCourse: "N/A",
       topDistrict: "N/A",
       topLeadSource: "N/A",
+      topMonth: "N/A",
       aiInfluencePercentage: 0,
     };
   }
@@ -67,6 +79,24 @@ export function computeKPIs(data: EnrollmentData[]): KPIData {
   const topDistrict = countByKey("district")[0]?.[0] || "N/A";
   const topLeadSource = countByKey("howDidYouHear")[0]?.[0] || "N/A";
 
+  const monthCounts: Record<string, number> = {};
+  data.forEach((d) => {
+    if (!d.enrollmentDate) return;
+    const parts = d.enrollmentDate.split("/");
+    if (parts.length === 3) {
+      const monthYear = `${parts[2]}-${parts[1]}`;
+      monthCounts[monthYear] = (monthCounts[monthYear] || 0) + 1;
+    }
+  });
+
+  let topMonthRaw = Object.entries(monthCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+  let topMonth = topMonthRaw;
+  if (topMonthRaw !== "N/A") {
+    const [year, month] = topMonthRaw.split("-");
+    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+    topMonth = date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+  }
+
   const aiInfluenced = data.filter(
     (d) => d.choseDueToAI.toLowerCase() === "yes"
   ).length;
@@ -79,6 +109,7 @@ export function computeKPIs(data: EnrollmentData[]): KPIData {
     topCourse,
     topDistrict,
     topLeadSource,
+    topMonth,
     aiInfluencePercentage,
   };
 }
@@ -199,6 +230,32 @@ export function getUniqueDistricts(data: EnrollmentData[]): string[] {
 
 export function getUniqueStatuses(data: EnrollmentData[]): string[] {
   return [...new Set(data.map((d) => d.currentStatus).filter(Boolean))].sort();
+}
+
+export function getUniqueMonths(data: EnrollmentData[]): MonthOption[] {
+  const months = new Set<string>();
+  data.forEach((d) => {
+    if (!d.enrollmentDate) return;
+    const parts = d.enrollmentDate.split("/");
+    if (parts.length === 3) {
+      const monthYear = `${parts[2]}-${parts[1]}`;
+      months.add(monthYear);
+    }
+  });
+
+  return Array.from(months)
+    .sort((a, b) => b.localeCompare(a))
+    .map((val) => {
+      const [year, month] = val.split("-");
+      const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+      return {
+        value: val,
+        label: date.toLocaleDateString("en-US", {
+          month: "short",
+          year: "numeric",
+        }),
+      };
+    });
 }
 
 // ─── Insights Engine ───────────────────────────────────────────────

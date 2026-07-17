@@ -13,6 +13,7 @@ import {
   getUniqueDistricts,
   getUniqueStatuses,
   generateInsights,
+  getUniqueMonths,
 } from "@/lib/analytics";
 
 import TabNavigation from "@/components/TabNavigation";
@@ -34,6 +35,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
     course: "All",
     district: "All",
     currentStatus: "All",
+    month: "All",
   });
 
   // Derived data — recomputed only when filters change
@@ -51,6 +53,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
   const courses = useMemo(() => getUniqueCourses(data), [data]);
   const districts = useMemo(() => getUniqueDistricts(data), [data]);
   const statuses = useMemo(() => getUniqueStatuses(data), [data]);
+  const months = useMemo(() => getUniqueMonths(data), [data]);
 
   return (
     <div className="flex flex-1 flex-col gap-6 pb-12">
@@ -64,7 +67,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
         {activeTab === 0 && (
           <div className="space-y-6" id="dashboard-tab">
             {/* KPI Row */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <KPICard
                 title="Total Enrollments"
                 value={kpis.totalEnrollments}
@@ -116,6 +119,20 @@ export default function DashboardClient({ data }: DashboardClientProps) {
                   </svg>
                 }
               />
+              <KPICard
+                title="Top Month"
+                value={kpis.topMonth}
+                delay={4}
+                gradient="from-accent-pink to-accent-emerald"
+                icon={
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                }
+              />
             </div>
 
             {/* Filters */}
@@ -125,6 +142,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
               courses={courses}
               districts={districts}
               statuses={statuses}
+              months={months}
             />
 
             {/* Charts Row 1 */}
@@ -155,7 +173,8 @@ export default function DashboardClient({ data }: DashboardClientProps) {
             {/* Filtered Count Banner */}
             {(filters.course !== "All" ||
               filters.district !== "All" ||
-              filters.currentStatus !== "All") && (
+              filters.currentStatus !== "All" ||
+              filters.month !== "All") && (
               <div className="fade-in-up rounded-xl border border-accent-blue/20 bg-accent-blue/5 px-4 py-3 text-center text-sm text-text-secondary">
                 Showing{" "}
                 <span className="font-bold text-accent-blue">
