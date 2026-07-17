@@ -10,6 +10,7 @@ interface FilterBarProps {
   statuses: string[];
   months: MonthOption[];
   batches: string[];
+  years: string[];
 }
 
 export default function FilterBar({
@@ -20,6 +21,7 @@ export default function FilterBar({
   statuses,
   months,
   batches,
+  years,
 }: FilterBarProps) {
   return (
     <div className="fade-in-up glass-card-static p-4" id="filter-bar">
@@ -44,7 +46,8 @@ export default function FilterBar({
           filters.district !== "All" ||
           filters.currentStatus !== "All" ||
           filters.month !== "All" ||
-          filters.batch !== "All") && (
+          filters.batch !== "All" ||
+          filters.year !== "All") && (
           <button
             id="clear-filters"
             onClick={() =>
@@ -54,6 +57,7 @@ export default function FilterBar({
                 currentStatus: "All",
                 month: "All",
                 batch: "All",
+                year: "All",
               })
             }
             className="ml-auto rounded-lg bg-accent-primary/10 px-2.5 py-1 text-xs font-medium text-accent-primary transition-colors hover:bg-accent-primary/20"
@@ -63,7 +67,7 @@ export default function FilterBar({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
         {/* Course Filter */}
         <div>
           <label
@@ -182,6 +186,30 @@ export default function FilterBar({
             {batches.map((b) => (
               <option key={b} value={b}>
                 {b}
+              </option>
+            ))}
+          </select>
+        </div>
+        {/* Year Filter */}
+        <div>
+          <label
+            htmlFor="year-filter"
+            className="mb-1.5 block text-xs font-medium text-text-muted"
+          >
+            Year
+          </label>
+          <select
+            id="year-filter"
+            value={filters.year}
+            onChange={(e) =>
+              onFilterChange({ ...filters, year: e.target.value })
+            }
+            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
+          >
+            <option value="All">All Years</option>
+            {years.map((y) => (
+              <option key={y} value={y}>
+                {y}
               </option>
             ))}
           </select>

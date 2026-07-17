@@ -91,6 +91,7 @@ export interface FilterState {
   currentStatus: string;
   month: string;
   batch: string;
+  year: string;
 }
 
 export interface MonthOption {

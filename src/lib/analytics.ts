@@ -30,12 +30,19 @@ export function applyFilters(
     )
       return false;
     if (filters.batch !== "All" && d.batchName !== filters.batch) return false;
-    if (filters.month !== "All") {
+    if (filters.month !== "All" || filters.year !== "All") {
       if (!d.enrollmentDate) return false;
       const parts = d.enrollmentDate.split("/");
       if (parts.length === 3) {
-        const monthNum = parseInt(parts[1], 10).toString();
-        if (monthNum !== filters.month) return false;
+        if (filters.month !== "All") {
+          const monthNum = parseInt(parts[1], 10).toString();
+          if (monthNum !== filters.month) return false;
+        }
+        if (filters.year !== "All") {
+          // year might have time attached, e.g. "2025 14:30:00"
+          const yearStr = parts[2].trim().split(" ")[0];
+          if (yearStr !== filters.year) return false;
+        }
       } else {
         return false;
       }
@@ -241,18 +248,24 @@ export function computeTrends(data: EnrollmentData[]): TrendPoint[] {
     if (!d.enrollmentDate) return;
     const parts = d.enrollmentDate.split("/");
     if (parts.length === 3) {
-      // Convert to YYYY-MM to aggregate by month
-      const monthYear = `${parts[2]}-${parts[1]}`;
-      dateMap[monthYear] = (dateMap[monthYear] || 0) + 1;
+      const monthStr = parts[1].padStart(2, "0"); 
+      // Aggregate by month only (e.g. "01", "02") to see overall month performance
+      dateMap[monthStr] = (dateMap[monthStr] || 0) + 1;
     }
   });
 
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
   return Object.entries(dateMap)
-    .map(([date, enrollments]) => ({
-      date,
-      enrollments,
-    }))
-    .sort((a, b) => a.date.localeCompare(b.date));
+    .sort((a, b) => a[0].localeCompare(b[0])) // Sort chronologically from Jan to Dec
+    .map(([monthStr, enrollments]) => {
+      const monthName = monthNames[parseInt(monthStr, 10) - 1];
+      
+      return {
+        date: monthName, // e.g., "Jan", "Feb"
+        enrollments,
+      };
+    });
 }
 
 // ─── Competitor Mentions ───────────────────────────────────────────
@@ -309,7 +322,21 @@ export function getUniqueStatuses(data: EnrollmentData[]): string[] {
 }
 
 export function getUniqueBatches(data: EnrollmentData[]): string[] {
-  return [...new Set(data.map((d) => d.batchName).filter(Boolean))].sort();
+  const set = new Set(data.map((d) => d.batchName).filter(Boolean));
+  return Array.from(set).sort();
+}
+
+export function getUniqueYears(data: EnrollmentData[]): string[] {
+  const set = new Set<string>();
+  data.forEach((d) => {
+    if (!d.enrollmentDate) return;
+    const parts = d.enrollmentDate.split("/");
+    if (parts.length === 3) {
+      const year = parts[2].trim().split(" ")[0];
+      if (year) set.add(year);
+    }
+  });
+  return Array.from(set).sort((a, b) => b.localeCompare(a)); // Descending order (newest first)
 }
 
 export function getUniqueMonths(data: EnrollmentData[]): MonthOption[] {

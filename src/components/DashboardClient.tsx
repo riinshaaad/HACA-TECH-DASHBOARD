@@ -18,6 +18,7 @@ import {
   generateInsights,
   getUniqueMonths,
   getUniqueBatches,
+  getUniqueYears,
 } from "@/lib/analytics";
 
 import TabNavigation from "@/components/TabNavigation";
@@ -44,6 +45,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
     currentStatus: "All",
     month: "All",
     batch: "All",
+    year: "All",
   });
 
   // Derived data — recomputed only when filters change
@@ -66,6 +68,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
   const statuses = useMemo(() => getUniqueStatuses(data), [data]);
   const months = useMemo(() => getUniqueMonths(data), [data]);
   const batches = useMemo(() => getUniqueBatches(data), [data]);
+  const years = useMemo(() => getUniqueYears(data), [data]);
 
   return (
     <div className="flex flex-1 flex-col gap-6 pb-12">
@@ -144,6 +147,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
               statuses={statuses}
               months={months}
               batches={batches}
+              years={years}
             />
 
             {/* Charts Row 1 */}
