@@ -9,6 +9,7 @@ interface FilterBarProps {
   districts: string[];
   statuses: string[];
   months: MonthOption[];
+  batches: string[];
 }
 
 export default function FilterBar({
@@ -18,6 +19,7 @@ export default function FilterBar({
   districts,
   statuses,
   months,
+  batches,
 }: FilterBarProps) {
   return (
     <div className="fade-in-up glass-card-static p-4" id="filter-bar">
@@ -41,7 +43,8 @@ export default function FilterBar({
         {(filters.course !== "All" ||
           filters.district !== "All" ||
           filters.currentStatus !== "All" ||
-          filters.month !== "All") && (
+          filters.month !== "All" ||
+          filters.batch !== "All") && (
           <button
             id="clear-filters"
             onClick={() =>
@@ -50,6 +53,7 @@ export default function FilterBar({
                 district: "All",
                 currentStatus: "All",
                 month: "All",
+                batch: "All",
               })
             }
             className="ml-auto rounded-lg bg-accent-blue/10 px-2.5 py-1 text-xs font-medium text-accent-blue transition-colors hover:bg-accent-blue/20"
@@ -59,7 +63,7 @@ export default function FilterBar({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {/* Course Filter */}
         <div>
           <label
@@ -154,6 +158,30 @@ export default function FilterBar({
             {months.map((m) => (
               <option key={m.value} value={m.value}>
                 {m.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        {/* Batch Filter */}
+        <div>
+          <label
+            htmlFor="batch-filter"
+            className="mb-1.5 block text-xs font-medium text-text-muted"
+          >
+            Batch
+          </label>
+          <select
+            id="batch-filter"
+            value={filters.batch}
+            onChange={(e) =>
+              onFilterChange({ ...filters, batch: e.target.value })
+            }
+            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/30"
+          >
+            <option value="All">All Batches</option>
+            {batches.map((b) => (
+              <option key={b} value={b}>
+                {b}
               </option>
             ))}
           </select>

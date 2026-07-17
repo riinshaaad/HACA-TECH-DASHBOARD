@@ -2,6 +2,9 @@ import {
   EnrollmentData,
   KPIData,
   CourseDistribution,
+  DistrictDistribution,
+  GenderDistribution,
+  StatusDistribution,
   LeadSourceDistribution,
   TrendPoint,
   CompetitorRank,
@@ -35,12 +38,13 @@ export function applyFilters(
       d.currentStatus !== filters.currentStatus
     )
       return false;
+    if (filters.batch !== "All" && d.batchName !== filters.batch) return false;
     if (filters.month !== "All") {
       if (!d.enrollmentDate) return false;
       const parts = d.enrollmentDate.split("/");
       if (parts.length === 3) {
-        const monthYear = `${parts[2]}-${parts[1]}`;
-        if (monthYear !== filters.month) return false;
+        const monthNum = parseInt(parts[1], 10).toString();
+        if (monthNum !== filters.month) return false;
       } else {
         return false;
       }
@@ -84,17 +88,18 @@ export function computeKPIs(data: EnrollmentData[]): KPIData {
     if (!d.enrollmentDate) return;
     const parts = d.enrollmentDate.split("/");
     if (parts.length === 3) {
-      const monthYear = `${parts[2]}-${parts[1]}`;
-      monthCounts[monthYear] = (monthCounts[monthYear] || 0) + 1;
+      const monthNum = parseInt(parts[1], 10);
+      if (!isNaN(monthNum)) {
+        monthCounts[monthNum] = (monthCounts[monthNum] || 0) + 1;
+      }
     }
   });
 
   let topMonthRaw = Object.entries(monthCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
   let topMonth = topMonthRaw;
   if (topMonthRaw !== "N/A") {
-    const [year, month] = topMonthRaw.split("-");
-    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-    topMonth = date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    const date = new Date(2000, parseInt(topMonthRaw) - 1, 1);
+    topMonth = date.toLocaleDateString("en-US", { month: "long" });
   }
 
   const aiInfluenced = data.filter(
@@ -130,6 +135,67 @@ export function computeCourseDistribution(
       course,
       count,
       fill: CHART_COLORS[i % CHART_COLORS.length],
+    }));
+}
+
+// ─── District Distribution ───────────────────────────────────────────
+export function computeDistrictDistribution(
+  data: EnrollmentData[]
+): DistrictDistribution[] {
+  const counts: Record<string, number> = {};
+  data.forEach((d) => {
+    const district = d.district || "Unknown";
+    counts[district] = (counts[district] || 0) + 1;
+  });
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([district, count], i) => ({
+      district,
+      count,
+      fill: CHART_COLORS[i % CHART_COLORS.length],
+    }));
+}
+
+// ─── Gender Distribution ───────────────────────────────────────────
+export function computeGenderDistribution(
+  data: EnrollmentData[]
+): GenderDistribution[] {
+  const counts: Record<string, number> = {};
+  data.forEach((d) => {
+    let gender = d.gender || "Unknown";
+    // clean up simple variants
+    if (gender.toLowerCase().startsWith("m")) gender = "Male";
+    else if (gender.toLowerCase().startsWith("f")) gender = "Female";
+    
+    counts[gender] = (counts[gender] || 0) + 1;
+  });
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([gender, count], i) => ({
+      gender,
+      count,
+      fill: CHART_COLORS[(i + 4) % CHART_COLORS.length], // offset colors slightly so it doesn't match other charts
+    }));
+}
+
+// ─── Status Distribution ───────────────────────────────────────────
+export function computeStatusDistribution(
+  data: EnrollmentData[]
+): StatusDistribution[] {
+  const counts: Record<string, number> = {};
+  data.forEach((d) => {
+    const status = d.currentStatus || "Unknown";
+    counts[status] = (counts[status] || 0) + 1;
+  });
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([status, count], i) => ({
+      status,
+      count,
+      fill: CHART_COLORS[(i + 2) % CHART_COLORS.length], 
     }));
 }
 
@@ -232,28 +298,30 @@ export function getUniqueStatuses(data: EnrollmentData[]): string[] {
   return [...new Set(data.map((d) => d.currentStatus).filter(Boolean))].sort();
 }
 
+export function getUniqueBatches(data: EnrollmentData[]): string[] {
+  return [...new Set(data.map((d) => d.batchName).filter(Boolean))].sort();
+}
+
 export function getUniqueMonths(data: EnrollmentData[]): MonthOption[] {
-  const months = new Set<string>();
+  const months = new Set<number>();
   data.forEach((d) => {
     if (!d.enrollmentDate) return;
     const parts = d.enrollmentDate.split("/");
     if (parts.length === 3) {
-      const monthYear = `${parts[2]}-${parts[1]}`;
-      months.add(monthYear);
+      const month = parseInt(parts[1], 10);
+      if (!isNaN(month)) {
+        months.add(month);
+      }
     }
   });
 
   return Array.from(months)
-    .sort((a, b) => b.localeCompare(a))
-    .map((val) => {
-      const [year, month] = val.split("-");
-      const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+    .sort((a, b) => a - b)
+    .map((monthNum) => {
+      const date = new Date(2000, monthNum - 1, 1);
       return {
-        value: val,
-        label: date.toLocaleDateString("en-US", {
-          month: "short",
-          year: "numeric",
-        }),
+        value: monthNum.toString(),
+        label: date.toLocaleDateString("en-US", { month: "long" }),
       };
     });
 }

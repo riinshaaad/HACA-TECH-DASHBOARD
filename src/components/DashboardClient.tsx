@@ -7,6 +7,9 @@ import {
   computeKPIs,
   computeCourseDistribution,
   computeLeadSources,
+  computeDistrictDistribution,
+  computeGenderDistribution,
+  computeStatusDistribution,
   computeTrends,
   computeCompetitorMentions,
   getUniqueCourses,
@@ -14,6 +17,7 @@ import {
   getUniqueStatuses,
   generateInsights,
   getUniqueMonths,
+  getUniqueBatches,
 } from "@/lib/analytics";
 
 import TabNavigation from "@/components/TabNavigation";
@@ -21,6 +25,9 @@ import KPICard from "@/components/KPICard";
 import FilterBar from "@/components/FilterBar";
 import CourseDistributionChart from "@/components/charts/CourseDistributionChart";
 import LeadSourceChart from "@/components/charts/LeadSourceChart";
+import DistrictDistributionChart from "@/components/charts/DistrictDistributionChart";
+import GenderDistributionChart from "@/components/charts/GenderDistributionChart";
+import StatusDistributionChart from "@/components/charts/StatusDistributionChart";
 import TrendChart from "@/components/charts/TrendChart";
 import CompetitorMentions from "@/components/CompetitorMentions";
 import InsightCard from "@/components/InsightCard";
@@ -36,6 +43,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
     district: "All",
     currentStatus: "All",
     month: "All",
+    batch: "All",
   });
 
   // Derived data — recomputed only when filters change
@@ -43,6 +51,9 @@ export default function DashboardClient({ data }: DashboardClientProps) {
   const kpis = useMemo(() => computeKPIs(filteredData), [filteredData]);
   const courseDist = useMemo(() => computeCourseDistribution(filteredData), [filteredData]);
   const leadSources = useMemo(() => computeLeadSources(filteredData), [filteredData]);
+  const districtDist = useMemo(() => computeDistrictDistribution(filteredData), [filteredData]);
+  const genderDist = useMemo(() => computeGenderDistribution(filteredData), [filteredData]);
+  const statusDist = useMemo(() => computeStatusDistribution(filteredData), [filteredData]);
   const trends = useMemo(() => computeTrends(filteredData), [filteredData]);
 
   // Insights and benchmarks use full data
@@ -54,6 +65,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
   const districts = useMemo(() => getUniqueDistricts(data), [data]);
   const statuses = useMemo(() => getUniqueStatuses(data), [data]);
   const months = useMemo(() => getUniqueMonths(data), [data]);
+  const batches = useMemo(() => getUniqueBatches(data), [data]);
 
   return (
     <div className="flex flex-1 flex-col gap-6 pb-12">
@@ -67,7 +79,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
         {activeTab === 0 && (
           <div className="space-y-6" id="dashboard-tab">
             {/* KPI Row */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <KPICard
                 title="Total Enrollments"
                 value={kpis.totalEnrollments}
@@ -80,18 +92,6 @@ export default function DashboardClient({ data }: DashboardClientProps) {
                     <circle cx="9" cy="7" r="4" />
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                }
-              />
-              <KPICard
-                title="Top Course"
-                value={kpis.topCourse}
-                delay={1}
-                gradient="from-accent-cyan to-accent-blue"
-                icon={
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
                   </svg>
                 }
               />
@@ -143,6 +143,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
               districts={districts}
               statuses={statuses}
               months={months}
+              batches={batches}
             />
 
             {/* Charts Row 1 */}
@@ -153,28 +154,22 @@ export default function DashboardClient({ data }: DashboardClientProps) {
 
             {/* Charts Row 2 */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <DistrictDistributionChart data={districtDist} />
               <TrendChart data={trends} />
-              {/* Added a placeholder for alignment if we want another chart here, or stretch TrendChart */}
-              <div className="glass-card-static p-5 flex flex-col items-center justify-center fade-in-up-delay-4">
-                <div className="text-center">
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent-blue/10">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                  </div>
-                  <h3 className="mb-1 text-sm font-semibold text-text-primary">AI Influence</h3>
-                  <p className="text-xs text-text-muted">
-                    {kpis.aiInfluencePercentage}% of these students chose the institute due to AI mentions.
-                  </p>
-                </div>
-              </div>
+            </div>
+
+            {/* Charts Row 3 */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <GenderDistributionChart data={genderDist} />
+              <StatusDistributionChart data={statusDist} />
             </div>
 
             {/* Filtered Count Banner */}
             {(filters.course !== "All" ||
               filters.district !== "All" ||
               filters.currentStatus !== "All" ||
-              filters.month !== "All") && (
+              filters.month !== "All" ||
+              filters.batch !== "All") && (
               <div className="fade-in-up rounded-xl border border-accent-blue/20 bg-accent-blue/5 px-4 py-3 text-center text-sm text-text-secondary">
                 Showing{" "}
                 <span className="font-bold text-accent-blue">

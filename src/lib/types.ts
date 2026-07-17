@@ -42,6 +42,24 @@ export interface CourseDistribution {
   fill: string;
 }
 
+export interface DistrictDistribution {
+  district: string;
+  count: number;
+  fill: string;
+}
+
+export interface GenderDistribution {
+  gender: string;
+  count: number;
+  fill: string;
+}
+
+export interface StatusDistribution {
+  status: string;
+  count: number;
+  fill: string;
+}
+
 export interface LeadSourceDistribution {
   source: string;
   count: number;
@@ -72,6 +90,7 @@ export interface FilterState {
   district: string;
   currentStatus: string;
   month: string;
+  batch: string;
 }
 
 export interface MonthOption {
