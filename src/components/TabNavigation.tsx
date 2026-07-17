@@ -62,14 +62,14 @@ export default function TabNavigation({
             onClick={() => onTabChange(tab.id)}
             className={`relative flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
               activeTab === tab.id
-                ? "bg-gradient-to-r from-accent-blue/20 to-accent-indigo/20 text-text-primary shadow-lg"
+                ? "bg-gradient-to-r from-accent-primary/20 to-accent-primary-hover/20 text-text-primary shadow-lg"
                 : "text-text-muted hover:bg-surface-hover hover:text-text-secondary"
             }`}
           >
             <span
               className={
                 activeTab === tab.id
-                  ? "text-accent-blue"
+                  ? "text-accent-primary"
                   : "text-text-muted"
               }
             >
@@ -80,7 +80,7 @@ export default function TabNavigation({
               {tab.id === 0 ? "Dashboard" : "Insights"}
             </span>
             {activeTab === tab.id && (
-              <span className="tab-indicator absolute bottom-0 left-1/2 h-0.5 w-12 -translate-x-1/2 rounded-full bg-gradient-to-r from-accent-blue to-accent-indigo" />
+              <span className="tab-indicator absolute bottom-0 left-1/2 h-0.5 w-12 -translate-x-1/2 rounded-full bg-gradient-to-r from-accent-primary to-accent-primary-hover" />
             )}
           </button>
         ))}

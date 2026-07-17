@@ -13,16 +13,7 @@ import {
   MonthOption,
 } from "./types";
 
-const CHART_COLORS = [
-  "#3b82f6", // blue-500
-  "#6366f1", // indigo-500
-  "#8b5cf6", // violet-500
-  "#06b6d4", // cyan-500
-  "#10b981", // emerald-500
-  "#f59e0b", // amber-500
-  "#ef4444", // red-500
-  "#ec4899", // pink-500
-];
+// Removed CHART_COLORS array since we are using explicit semantic colors to avoid the "rainbow" look
 
 // ─── Filter Helper ─────────────────────────────────────────────────
 export function applyFilters(
@@ -120,6 +111,16 @@ export function computeKPIs(data: EnrollmentData[]): KPIData {
 }
 
 // ─── Course Distribution ───────────────────────────────────────────
+const DONUT_COLORS = [
+  "#7B5CFA", // Primary Purple
+  "#06b6d4", // Cyan
+  "#f59e0b", // Amber
+  "#ec4899", // Pink
+  "#10b981", // Emerald
+  "#3b82f6", // Blue
+  "#FF7A50", // Orange
+];
+
 export function computeCourseDistribution(
   data: EnrollmentData[]
 ): CourseDistribution[] {
@@ -134,9 +135,11 @@ export function computeCourseDistribution(
     .map(([course, count], i) => ({
       course,
       count,
-      fill: CHART_COLORS[i % CHART_COLORS.length],
+      fill: DONUT_COLORS[i % DONUT_COLORS.length], 
     }));
 }
+
+const BAR_COLORS = ["#7B5CFA", "#9B6BFF"]; // Two elegant, standard colors for the bars
 
 // ─── District Distribution ───────────────────────────────────────────
 export function computeDistrictDistribution(
@@ -153,7 +156,7 @@ export function computeDistrictDistribution(
     .map(([district, count], i) => ({
       district,
       count,
-      fill: CHART_COLORS[i % CHART_COLORS.length],
+      fill: BAR_COLORS[i % 2], // Alternate between the two colors
     }));
 }
 
@@ -173,11 +176,18 @@ export function computeGenderDistribution(
 
   return Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
-    .map(([gender, count], i) => ({
-      gender,
-      count,
-      fill: CHART_COLORS[(i + 4) % CHART_COLORS.length], // offset colors slightly so it doesn't match other charts
-    }));
+    .map(([gender, count]) => {
+      // Clear, distinct colors for the pie chart
+      let fill = "#f59e0b"; // Default / Other (Amber)
+      if (gender === "Male") fill = "#06b6d4"; // Cyan
+      else if (gender === "Female") fill = "#7B5CFA"; // Primary Purple
+      
+      return {
+        gender,
+        count,
+        fill,
+      };
+    });
 }
 
 // ─── Status Distribution ───────────────────────────────────────────
@@ -195,7 +205,7 @@ export function computeStatusDistribution(
     .map(([status, count], i) => ({
       status,
       count,
-      fill: CHART_COLORS[(i + 2) % CHART_COLORS.length], 
+      fill: BAR_COLORS[i % 2], 
     }));
 }
 
@@ -218,7 +228,7 @@ export function computeLeadSources(
     .map(([source, count], i) => ({
       source,
       count,
-      fill: CHART_COLORS[i % CHART_COLORS.length],
+      fill: BAR_COLORS[i % 2], 
     }));
 }
 

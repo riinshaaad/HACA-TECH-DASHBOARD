@@ -63,7 +63,7 @@ export default function CompetitorMentions({ data }: CompetitorMentionsProps) {
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-surface-hover">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-accent-pink to-accent-indigo transition-all duration-700"
+                    className="h-full rounded-full bg-gradient-to-r from-accent-pink to-accent-primary-hover transition-all duration-700"
                     style={{
                       width: `${(comp.mentions / maxVal) * 100}%`,
                     }}

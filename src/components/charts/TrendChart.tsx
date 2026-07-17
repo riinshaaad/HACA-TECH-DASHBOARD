@@ -41,7 +41,7 @@ const CustomTooltip = ({
       </p>
       {payload.map((p) => (
         <p key={p.dataKey} className="text-xs text-text-secondary">
-          Enrollments: <span className="font-bold text-accent-blue">{p.value}</span>
+          Enrollments: <span className="font-bold text-accent-primary">{p.value}</span>
         </p>
       ))}
     </div>
@@ -119,7 +119,7 @@ export default function TrendChart({ data }: TrendChartProps) {
       {/* Legend */}
       <div className="mt-3 flex items-center justify-center gap-6">
         <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-accent-blue" />
+          <span className="h-2 w-2 rounded-full bg-accent-primary" />
           <span className="text-xs text-text-muted">Enrollments</span>
         </div>
       </div>

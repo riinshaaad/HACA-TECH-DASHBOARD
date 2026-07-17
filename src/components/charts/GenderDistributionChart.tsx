@@ -27,7 +27,7 @@ const CustomTooltip = ({
       <p className="text-sm font-semibold text-text-primary">{d.gender}</p>
       <div className="mt-1">
         <p className="text-xs text-text-secondary">
-          Students: <span className="font-bold text-accent-blue">{d.count}</span>
+          Students: <span className="font-bold text-accent-primary">{d.count}</span>
         </p>
       </div>
     </div>

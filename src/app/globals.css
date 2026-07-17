@@ -2,35 +2,34 @@
 
 /* ─── Dark-Mode Design Tokens ───────────────────────────────────── */
 :root {
-  --background: #060b18;
+  --background: #000000;
   --surface: #0d1424;
   --surface-hover: #131d33;
   --surface-elevated: #162036;
   --border: #1e2d4a;
   --border-light: #243656;
 
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
+  --text-primary: #ffffff;
+  --text-secondary: #B0B0B0;
   --text-muted: #64748b;
-
-  --accent-blue: #3b82f6;
-  --accent-indigo: #6366f1;
+  --accent-primary: #7b5cfa;
+  --accent-primary-hover: #9b6bff;
+  --accent-primary-pressed: #5a3fd6;
   --accent-cyan: #06b6d4;
   --accent-emerald: #10b981;
   --accent-amber: #f59e0b;
   --accent-red: #ef4444;
   --accent-pink: #ec4899;
 
-  --gradient-blue: linear-gradient(135deg, #3b82f6, #6366f1);
-  --gradient-cyan: linear-gradient(135deg, #06b6d4, #3b82f6);
+  --gradient-primary: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+  --gradient-cyan: linear-gradient(135deg, #06b6d4, var(--accent-primary));
   --gradient-emerald: linear-gradient(135deg, #10b981, #06b6d4);
   --gradient-amber: linear-gradient(135deg, #f59e0b, #ef4444);
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.6);
-  --shadow-glow-blue: 0 0 20px rgba(59, 130, 246, 0.15);
-  --shadow-glow-indigo: 0 0 20px rgba(99, 102, 241, 0.15);
+  --shadow-glow-primary: 0 0 20px rgba(123, 92, 250, 0.15);
 }
 
 @theme inline {
@@ -44,8 +43,9 @@
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
-  --color-accent-blue: var(--accent-blue);
-  --color-accent-indigo: var(--accent-indigo);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-primary-hover: var(--accent-primary-hover);
+  --color-accent-primary-pressed: var(--accent-primary-pressed);
   --color-accent-cyan: var(--accent-cyan);
   --color-accent-emerald: var(--accent-emerald);
   --color-accent-amber: var(--accent-amber);
@@ -85,19 +85,19 @@ body {
 .glass-card {
   background: linear-gradient(
     135deg,
-    rgba(13, 20, 36, 0.8),
-    rgba(22, 32, 54, 0.6)
+    rgba(123, 92, 250, 0.08),
+    rgba(90, 63, 214, 0.03)
   );
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(123, 92, 250, 0.15);
   border-radius: 16px;
   box-shadow: var(--shadow-md);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  border-color: var(--border-light);
+  border-color: rgba(155, 107, 255, 0.3); /* --accent-primary-hover */
   box-shadow: var(--shadow-lg);
   transform: translateY(-1px);
 }
@@ -105,19 +105,19 @@ body {
 .glass-card-static {
   background: linear-gradient(
     135deg,
-    rgba(13, 20, 36, 0.8),
-    rgba(22, 32, 54, 0.6)
+    rgba(123, 92, 250, 0.08),
+    rgba(90, 63, 214, 0.03)
   );
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(123, 92, 250, 0.15);
   border-radius: 16px;
   box-shadow: var(--shadow-md);
 }
 
 /* ─── Gradient Text ──────────────────────────────────────────────── */
 .gradient-text {
-  background: var(--gradient-blue);
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -141,7 +141,7 @@ body {
   inset: 0;
   border-radius: 16px;
   padding: 1px;
-  background: var(--gradient-blue);
+  background: var(--gradient-primary);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -264,19 +264,12 @@ select {
 
 /* ─── Background Mesh Gradient ───────────────────────────────────── */
 .bg-mesh {
-  background-image: radial-gradient(
-      at 20% 20%,
-      rgba(59, 130, 246, 0.08) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      at 80% 80%,
-      rgba(99, 102, 241, 0.06) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      at 50% 50%,
-      rgba(6, 182, 212, 0.04) 0%,
-      transparent 60%
-    );
+  background-image: linear-gradient(
+    135deg,
+    rgba(255, 122, 80, 0.25) 0%,
+    rgba(232, 90, 160, 0.2) 25%,
+    rgba(123, 92, 250, 0.15) 50%,
+    #000000 85%,
+    #000000 100%
+  );
 }

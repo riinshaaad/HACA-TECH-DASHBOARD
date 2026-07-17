@@ -28,9 +28,9 @@ const typeConfig: Record<
         <polyline points="17 6 23 6 23 12" />
       </svg>
     ),
-    gradient: "from-accent-blue to-accent-indigo",
+    gradient: "from-accent-primary to-accent-primary-hover",
     badge: "Trend",
-    badgeColor: "bg-accent-blue/10 text-accent-blue",
+    badgeColor: "bg-accent-primary/10 text-accent-primary",
   },
   anomaly: {
     icon: (

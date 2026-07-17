@@ -33,7 +33,7 @@ export default function FilterBar({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-accent-blue"
+          className="text-accent-primary"
         >
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
         </svg>
@@ -56,7 +56,7 @@ export default function FilterBar({
                 batch: "All",
               })
             }
-            className="ml-auto rounded-lg bg-accent-blue/10 px-2.5 py-1 text-xs font-medium text-accent-blue transition-colors hover:bg-accent-blue/20"
+            className="ml-auto rounded-lg bg-accent-primary/10 px-2.5 py-1 text-xs font-medium text-accent-primary transition-colors hover:bg-accent-primary/20"
           >
             Clear All
           </button>
@@ -78,7 +78,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, course: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/30"
+            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Courses</option>
             {courses.map((c) => (
@@ -103,7 +103,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, district: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/30"
+            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Districts</option>
             {districts.map((d) => (
@@ -128,7 +128,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, currentStatus: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/30"
+            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Statuses</option>
             {statuses.map((s) => (
@@ -152,7 +152,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, month: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/30"
+            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Months</option>
             {months.map((m) => (
@@ -176,7 +176,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, batch: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/30"
+            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Batches</option>
             {batches.map((b) => (

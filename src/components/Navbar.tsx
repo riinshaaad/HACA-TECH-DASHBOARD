@@ -5,30 +5,21 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo & Title */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent-blue to-accent-indigo shadow-lg">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 3v18h18" />
-              <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
-            </svg>
-            <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent-emerald ring-2 ring-surface" />
+        <div className="flex items-center gap-2.5 select-none">
+          {/* HACA */}
+          <div className="text-3xl font-black tracking-tighter text-white" style={{ fontFamily: 'Arial, sans-serif' }}>
+            HACA
           </div>
-          <div>
-            <h1 className="text-lg font-bold tracking-tight text-text-primary">
-              HACA<span className="gradient-text ml-1">Dashboard</span>
-            </h1>
-            <p className="hidden text-xs text-text-muted sm:block">
-              Live Enrollment Analytics
-            </p>
+          {/* Vertical Divider */}
+          <div className="h-8 w-[1px] bg-white/50" />
+          {/* TECH SCHOOL */}
+          <div className="flex flex-col justify-center leading-none pt-0.5">
+            <span className="text-[15px] font-bold tracking-[0.15em] text-white">
+              TECH
+            </span>
+            <span className="mt-[2px] bg-[#7B5CFA] px-1 text-[11px] font-bold tracking-[0.15em] text-white w-fit">
+              SCHOOL
+            </span>
           </div>
         </div>
 

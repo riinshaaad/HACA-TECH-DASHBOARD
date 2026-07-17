@@ -27,7 +27,7 @@ const CustomTooltip = ({
       <p className="text-sm font-semibold text-text-primary">{d.course}</p>
       <div className="mt-1">
         <p className="text-xs text-text-secondary">
-          Students: <span className="font-bold text-accent-blue">{d.count}</span>
+          Students: <span className="font-bold text-accent-primary">{d.count}</span>
         </p>
       </div>
     </div>
@@ -38,7 +38,7 @@ export default function CourseDistributionChart({ data }: CourseDistributionChar
   return (
     <div className="glass-card-static p-5 fade-in-up-delay-2">
       <div className="mb-4 flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-blue/15">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-primary/15">
           <svg
             width="14"
             height="14"
