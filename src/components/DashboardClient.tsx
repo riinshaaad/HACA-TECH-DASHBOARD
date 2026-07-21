@@ -10,6 +10,10 @@ import {
   computeDistrictDistribution,
   computeGenderDistribution,
   computeStatusDistribution,
+  computeEducationDistribution,
+  computeInfluencingContentDistribution,
+  computeSeenAdsDistribution,
+  computeAIInfluenceDistribution,
   computeTrends,
   computeCompetitorMentions,
   getUniqueCourses,
@@ -30,7 +34,13 @@ import DistrictDistributionChart from "@/components/charts/DistrictDistributionC
 import GenderDistributionChart from "@/components/charts/GenderDistributionChart";
 import StatusDistributionChart from "@/components/charts/StatusDistributionChart";
 import TrendChart from "@/components/charts/TrendChart";
+import EducationDistributionChart from "@/components/charts/EducationDistributionChart";
+import InfluencingContentChart from "@/components/charts/InfluencingContentChart";
+import AIInfluenceChart from "@/components/charts/AIInfluenceChart";
+import SeenAdsChart from "@/components/charts/SeenAdsChart";
+import RespondentList from "@/components/RespondentList";
 import CompetitorMentions from "@/components/CompetitorMentions";
+import CompetitorStrategy from "@/components/CompetitorStrategy";
 import InsightCard from "@/components/InsightCard";
 
 interface DashboardClientProps {
@@ -57,6 +67,10 @@ export default function DashboardClient({ data }: DashboardClientProps) {
   const genderDist = useMemo(() => computeGenderDistribution(filteredData), [filteredData]);
   const statusDist = useMemo(() => computeStatusDistribution(filteredData), [filteredData]);
   const trends = useMemo(() => computeTrends(filteredData), [filteredData]);
+  const educationDist = useMemo(() => computeEducationDistribution(filteredData), [filteredData]);
+  const seenAds = useMemo(() => computeSeenAdsDistribution(filteredData), [filteredData]);
+  const aiInfluence = useMemo(() => computeAIInfluenceDistribution(filteredData), [filteredData]);
+  const influencingContent = useMemo(() => computeInfluencingContentDistribution(filteredData), [filteredData]);
 
   // Insights and benchmarks use full data
   const fullKPIs = useMemo(() => computeKPIs(data), [data]);
@@ -168,6 +182,23 @@ export default function DashboardClient({ data }: DashboardClientProps) {
               <StatusDistributionChart data={statusDist} />
             </div>
 
+            {/* Charts Row 4 */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <EducationDistributionChart data={educationDist} />
+              <SeenAdsChart data={seenAds} />
+            </div>
+
+            {/* Charts Row 5 */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <InfluencingContentChart data={influencingContent} />
+              <AIInfluenceChart data={aiInfluence} />
+            </div>
+
+            {/* Row 6 — Respondent Directory */}
+            <div className="grid grid-cols-1 gap-6">
+              <RespondentList data={filteredData} />
+            </div>
+
             {/* Filtered Count Banner */}
             {(filters.course !== "All" ||
               filters.district !== "All" ||
@@ -242,6 +273,22 @@ export default function DashboardClient({ data }: DashboardClientProps) {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+        
+        {/* ─── TAB 3: Competitor Strategy ─────────────────────── */}
+        {activeTab === 2 && (
+          <div className="space-y-6" id="strategy-tab">
+            <div className="fade-in-up">
+              <h2 className="text-xl font-bold text-text-primary">
+                Competitor Marketing <span className="gradient-text">Strategy</span>
+              </h2>
+              <p className="mt-1 text-sm text-text-muted">
+                Professional analysis of marketing strategies used by top competitors
+              </p>
+            </div>
+            
+            <CompetitorStrategy data={competitorRank} />
           </div>
         )}
       </div>

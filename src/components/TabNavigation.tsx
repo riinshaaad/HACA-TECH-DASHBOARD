@@ -46,6 +46,25 @@ const tabs = [
       </svg>
     ),
   },
+  {
+    id: 2,
+    label: "Competitor Strategy",
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function TabNavigation({
@@ -77,7 +96,7 @@ export default function TabNavigation({
             </span>
             <span className="hidden sm:inline">{tab.label}</span>
             <span className="sm:hidden">
-              {tab.id === 0 ? "Dashboard" : "Insights"}
+              {tab.id === 0 ? "Dashboard" : tab.id === 1 ? "Insights" : "Strategy"}
             </span>
             {activeTab === tab.id && (
               <span className="tab-indicator absolute bottom-0 left-1/2 h-0.5 w-12 -translate-x-1/2 rounded-full bg-gradient-to-r from-accent-primary to-accent-primary-hover" />

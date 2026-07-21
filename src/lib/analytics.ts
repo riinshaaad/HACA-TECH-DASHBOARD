@@ -5,6 +5,10 @@ import {
   DistrictDistribution,
   GenderDistribution,
   StatusDistribution,
+  EducationDistribution,
+  InfluencingContentDistribution,
+  SeenAdsDistribution,
+  AIInfluenceDistribution,
   LeadSourceDistribution,
   TrendPoint,
   CompetitorRank,
@@ -216,6 +220,40 @@ export function computeStatusDistribution(
     }));
 }
 
+// ─── Education Background Distribution ─────────────────────────────
+export function computeEducationDistribution(
+  data: EnrollmentData[]
+): EducationDistribution[] {
+  const counts: Record<string, number> = {};
+  data.forEach((d) => {
+    let bg = d.educationalBackground || "Unknown";
+    bg = bg.trim();
+    
+    // Capitalize first letter of each word for clean display without categorization
+    bg = bg.replace(/\b\w/g, (c) => c.toUpperCase());
+
+    if (bg.length > 20) {
+      bg = bg.substring(0, 18) + "…";
+    }
+
+    if (bg !== "Unknown" && bg !== "") {
+      counts[bg] = (counts[bg] || 0) + 1;
+    }
+  });
+
+  const sorted = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10); // Top 10 for bar chart
+
+  const maxCount = sorted.length > 0 ? sorted[0][1] : 1;
+
+  return sorted.map(([background, count]) => ({
+    background,
+    count,
+    fullMark: maxCount,
+  }));
+}
+
 // ─── Lead Sources ──────────────────────────────────────────────────
 export function computeLeadSources(
   data: EnrollmentData[]
@@ -237,6 +275,136 @@ export function computeLeadSources(
       count,
       fill: BAR_COLORS[i % 2], 
     }));
+}
+
+// ─── Influencing Content ───────────────────────────────────────────
+export function computeInfluencingContentDistribution(
+  data: EnrollmentData[]
+): InfluencingContentDistribution[] {
+  const counts: Record<string, number> = {};
+  data.forEach((d) => {
+    const raw = d.influencingContent || "Unknown";
+    if (
+      raw === "Unknown" ||
+      raw.trim() === "" ||
+      raw.toLowerCase().trim() === "na" ||
+      raw.toLowerCase().trim() === "none"
+    ) {
+      return;
+    }
+
+    const lower = raw.toLowerCase();
+    const categories: string[] = [];
+
+    // Categorize known complex strings
+    if (lower.includes("inform")) categories.push("Informative");
+    if (lower.includes("testim")) categories.push("Testimony");
+    if (lower.includes("life") && lower.includes("haca")) categories.push("Life at HACA");
+
+    if (categories.length > 0) {
+      categories.forEach((cat) => {
+        counts[cat] = (counts[cat] || 0) + 1;
+      });
+    } else {
+      // Handle other unrecognized content
+      let other = raw.trim();
+      if (other.length > 25) {
+        other = other.substring(0, 22) + "...";
+      }
+      other = other.charAt(0).toUpperCase() + other.slice(1);
+      counts[other] = (counts[other] || 0) + 1;
+    }
+  });
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6) // Top 6
+    .map(([content, count], i) => ({
+      content,
+      count,
+      fill: BAR_COLORS[i % 2], 
+    }));
+}
+
+// ─── Seen Ads ──────────────────────────────────────────────────────
+export function computeSeenAdsDistribution(
+  data: EnrollmentData[]
+): SeenAdsDistribution[] {
+  const counts: Record<string, number> = {};
+  data.forEach((d) => {
+    let answer = d.seenAds || "Unknown";
+    answer = answer.trim();
+
+    if (answer !== "Unknown" && answer !== "") {
+      // Normalize Yes/No
+      if (answer.toLowerCase().startsWith("yes")) {
+        answer = "Yes";
+      } else if (answer.toLowerCase().startsWith("no")) {
+        answer = "No";
+      } else {
+        // Just capitalize first letter if it's something else
+        answer = answer.charAt(0).toUpperCase() + answer.slice(1);
+      }
+      counts[answer] = (counts[answer] || 0) + 1;
+    }
+  });
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1]) // Sort largest first
+    .slice(0, 4) // Top 4
+    .map(([answer, count], i) => {
+      // Use standard purple theme for all charts
+      let fill = "#7B5CFA"; 
+      if (answer === "Yes") fill = "#7B5CFA"; // Primary Purple
+      else if (answer === "No") fill = "#06b6d4"; // Cyan
+      else fill = BAR_COLORS[i % 2];
+
+      return {
+        answer,
+        count,
+        fill,
+      };
+    });
+}
+
+// ─── AI Influence ──────────────────────────────────────────────────
+export function computeAIInfluenceDistribution(
+  data: EnrollmentData[]
+): AIInfluenceDistribution[] {
+  const counts: Record<string, number> = {};
+  data.forEach((d) => {
+    let answer = d.choseDueToAI || "Unknown";
+    answer = answer.trim();
+
+    if (answer !== "Unknown" && answer !== "") {
+      // Normalize Yes/No
+      if (answer.toLowerCase().startsWith("yes")) {
+        answer = "Yes";
+      } else if (answer.toLowerCase().startsWith("no")) {
+        answer = "No";
+      } else {
+        answer = answer.charAt(0).toUpperCase() + answer.slice(1);
+      }
+      counts[answer] = (counts[answer] || 0) + 1;
+    }
+  });
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1]) // Sort largest first
+    .slice(0, 4) // Top 4
+    .map(([answer, count], i) => {
+      // Standard purple theme
+      let fill = "#7B5CFA"; 
+      if (answer === "Yes") fill = "#7B5CFA"; // Primary Purple
+      else if (answer === "No") fill = "#06b6d4"; // Cyan
+      else fill = BAR_COLORS[i % 2];
+
+      return {
+        answer,
+        count,
+        fill,
+      };
+    });
 }
 
 // ─── Trend Over Time ───────────────────────────────────────────────

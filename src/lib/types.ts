@@ -60,6 +60,30 @@ export interface StatusDistribution {
   fill: string;
 }
 
+export interface EducationDistribution {
+  background: string;
+  count: number;
+  fullMark: number;
+}
+
+export interface InfluencingContentDistribution {
+  content: string;
+  count: number;
+  fill: string;
+}
+
+export interface SeenAdsDistribution {
+  answer: string;
+  count: number;
+  fill: string;
+}
+
+export interface AIInfluenceDistribution {
+  answer: string;
+  count: number;
+  fill: string;
+}
+
 export interface LeadSourceDistribution {
   source: string;
   count: number;
