@@ -94,7 +94,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
 
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[98%] px-4 sm:px-6 lg:px-8">
         {/* ─── TAB 1: Dashboard Overview ─────────────────────── */}
         {activeTab === 0 && (
           <div className="space-y-6" id="dashboard-tab">
@@ -168,37 +168,29 @@ export default function DashboardClient({ data }: DashboardClientProps) {
             />
 
             {/* Charts Row 1 */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <CourseDistributionChart data={courseDist} />
+              <GenderDistributionChart data={genderDist} />
               <LeadSourceChart data={leadSources} />
             </div>
 
             {/* Charts Row 2 */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <DistrictDistributionChart data={districtDist} />
               <TrendChart data={trends} />
-            </div>
-
-            {/* Charts Row 3 */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <GenderDistributionChart data={genderDist} />
               <StatusDistributionChart data={statusDist} />
             </div>
 
-            {/* Charts Row 4 */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Charts Row 3 */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <EducationDistributionChart data={educationDist} />
               <SeenAdsChart data={seenAds} />
-            </div>
-
-            {/* Charts Row 5 */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <InfluencingContentChart data={influencingContent} />
-              <AIInfluenceChart data={aiInfluence} />
             </div>
 
-            {/* Charts Row 6 */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Charts Row 4 */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <AIInfluenceChart data={aiInfluence} />
               <ReasonForChoosingChart data={reasonForChoosingDist} />
             </div>
 
