@@ -139,7 +139,8 @@ export function computeCourseDistribution(
 ): CourseDistribution[] {
   const counts: Record<string, number> = {};
   data.forEach((d) => {
-    const course = d.course || "Unknown";
+    const course = d.course;
+    if (!course || course === "Unknown") return;
     counts[course] = (counts[course] || 0) + 1;
   });
 
@@ -179,12 +180,14 @@ export function computeGenderDistribution(
 ): GenderDistribution[] {
   const counts: Record<string, number> = {};
   data.forEach((d) => {
-    let gender = d.gender || "Unknown";
-    // clean up simple variants
-    if (gender.toLowerCase().startsWith("m")) gender = "Male";
-    else if (gender.toLowerCase().startsWith("f")) gender = "Female";
+    if (!d.gender) return;
+    let gender = d.gender.toLowerCase();
     
-    counts[gender] = (counts[gender] || 0) + 1;
+    if (gender.startsWith("m")) {
+      counts["Male"] = (counts["Male"] || 0) + 1;
+    } else if (gender.startsWith("f")) {
+      counts["Female"] = (counts["Female"] || 0) + 1;
+    }
   });
 
   return Object.entries(counts)
