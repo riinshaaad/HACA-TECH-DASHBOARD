@@ -84,6 +84,18 @@ export interface AIInfluenceDistribution {
   fill: string;
 }
 
+export interface ReviewFrequencyDistribution {
+  answer: string;
+  count: number;
+  fill: string;
+}
+
+export interface ReasonDistribution {
+  reason: string;
+  count: number;
+  fill: string;
+}
+
 export interface LeadSourceDistribution {
   source: string;
   count: number;

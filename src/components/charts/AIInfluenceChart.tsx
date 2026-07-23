@@ -54,7 +54,7 @@ export default function AIInfluenceChart({ data }: AIInfluenceChartProps) {
             </svg>
           </div>
           <h3 className="text-sm font-semibold text-text-primary">
-            Influenced by AI in Curriculum
+            Impact of AI Branding
           </h3>
         </div>
         <div className="flex h-56 items-center justify-center">
@@ -84,7 +84,7 @@ export default function AIInfluenceChart({ data }: AIInfluenceChartProps) {
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Influenced by AI in Curriculum
+          Impact of AI Branding
         </h3>
       </div>
 

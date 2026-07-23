@@ -14,6 +14,7 @@ import {
   computeInfluencingContentDistribution,
   computeSeenAdsDistribution,
   computeAIInfluenceDistribution,
+  computeReasonForChoosingDistribution,
   computeTrends,
   computeCompetitorMentions,
   getUniqueCourses,
@@ -38,6 +39,7 @@ import EducationDistributionChart from "@/components/charts/EducationDistributio
 import InfluencingContentChart from "@/components/charts/InfluencingContentChart";
 import AIInfluenceChart from "@/components/charts/AIInfluenceChart";
 import SeenAdsChart from "@/components/charts/SeenAdsChart";
+import ReasonForChoosingChart from "@/components/charts/ReasonForChoosingChart";
 import RespondentList from "@/components/RespondentList";
 import CompetitorMentions from "@/components/CompetitorMentions";
 import CompetitorStrategy from "@/components/CompetitorStrategy";
@@ -71,6 +73,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
   const seenAds = useMemo(() => computeSeenAdsDistribution(filteredData), [filteredData]);
   const aiInfluence = useMemo(() => computeAIInfluenceDistribution(filteredData), [filteredData]);
   const influencingContent = useMemo(() => computeInfluencingContentDistribution(filteredData), [filteredData]);
+  const reasonForChoosingDist = useMemo(() => computeReasonForChoosingDistribution(filteredData), [filteredData]);
 
   // Insights and benchmarks use full data
   const fullKPIs = useMemo(() => computeKPIs(data), [data]);
@@ -194,7 +197,12 @@ export default function DashboardClient({ data }: DashboardClientProps) {
               <AIInfluenceChart data={aiInfluence} />
             </div>
 
-            {/* Row 6 — Respondent Directory */}
+            {/* Charts Row 6 */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <ReasonForChoosingChart data={reasonForChoosingDist} />
+            </div>
+
+            {/* Row 7 — Respondent Directory */}
             <div className="grid grid-cols-1 gap-6">
               <RespondentList data={filteredData} />
             </div>

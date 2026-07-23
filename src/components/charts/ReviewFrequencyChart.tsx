@@ -7,10 +7,10 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { SeenAdsDistribution } from "@/lib/types";
+import { ReviewFrequencyDistribution } from "@/lib/types";
 
-interface SeenAdsChartProps {
-  data: SeenAdsDistribution[];
+interface ReviewFrequencyChartProps {
+  data: ReviewFrequencyDistribution[];
 }
 
 const CustomTooltip = ({
@@ -18,13 +18,13 @@ const CustomTooltip = ({
   payload,
 }: {
   active?: boolean;
-  payload?: Array<{ payload: SeenAdsDistribution }>;
+  payload?: Array<{ payload: ReviewFrequencyDistribution }>;
 }) => {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
     <div className="rounded-xl border border-border bg-surface-elevated px-4 py-3 shadow-xl">
-      <p className="text-sm font-semibold text-text-primary">Saw Ads: {d.answer}</p>
+      <p className="text-sm font-semibold text-text-primary">Frequency: {d.answer}</p>
       <div className="mt-1">
         <p className="text-xs text-text-secondary">
           Students: <span className="font-bold text-accent-primary">{d.count}</span>
@@ -34,10 +34,10 @@ const CustomTooltip = ({
   );
 };
 
-export default function SeenAdsChart({ data }: SeenAdsChartProps) {
+export default function ReviewFrequencyChart({ data }: ReviewFrequencyChartProps) {
   if (data.length === 0) {
     return (
-      <div className="glass-card-static p-5 fade-in-up-delay-2">
+      <div className="glass-card-static p-5 fade-in-up-delay-3">
         <div className="mb-4 flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-primary/15">
             <svg
@@ -50,12 +50,12 @@ export default function SeenAdsChart({ data }: SeenAdsChartProps) {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
             </svg>
           </div>
           <h3 className="text-sm font-semibold text-text-primary">
-            Advertisement Reach
+            Power of Peer Reviews
           </h3>
         </div>
         <div className="flex h-56 items-center justify-center">
@@ -66,7 +66,7 @@ export default function SeenAdsChart({ data }: SeenAdsChartProps) {
   }
 
   return (
-    <div className="glass-card-static p-5 fade-in-up-delay-2">
+    <div className="glass-card-static p-5 fade-in-up-delay-3">
       <div className="mb-4 flex items-center gap-2">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-primary/15">
           <svg
@@ -79,12 +79,12 @@ export default function SeenAdsChart({ data }: SeenAdsChartProps) {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Advertisement Reach
+          Power of Peer Reviews
         </h3>
       </div>
 

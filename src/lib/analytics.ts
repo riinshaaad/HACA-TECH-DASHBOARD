@@ -9,6 +9,8 @@ import {
   InfluencingContentDistribution,
   SeenAdsDistribution,
   AIInfluenceDistribution,
+  ReviewFrequencyDistribution,
+  ReasonDistribution,
   LeadSourceDistribution,
   TrendPoint,
   CompetitorRank,
@@ -406,6 +408,86 @@ export function computeAIInfluenceDistribution(
       };
     });
 }
+
+// ─── Review Frequency ──────────────────────────────────────────────
+export function computeReviewFrequencyDistribution(
+  data: EnrollmentData[]
+): ReviewFrequencyDistribution[] {
+  const counts: Record<string, number> = {};
+  data.forEach((d) => {
+    let answer = d.reviewFrequency || "Unknown";
+    answer = answer.trim();
+
+    if (answer !== "Unknown" && answer !== "") {
+      // Normalize simple strings if needed
+      answer = answer.charAt(0).toUpperCase() + answer.slice(1);
+      counts[answer] = (counts[answer] || 0) + 1;
+    }
+  });
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1]) // Sort largest first
+    .slice(0, 5) // Top 5
+    .map(([answer, count], i) => {
+      let fill = BAR_COLORS[i % 2];
+      return {
+        answer,
+        count,
+        fill,
+      };
+    });
+}
+
+// ─── Reason for Choosing ───────────────────────────────────────────
+export function computeReasonForChoosingDistribution(
+  data: EnrollmentData[]
+): ReasonDistribution[] {
+  const counts: Record<string, number> = {};
+  data.forEach((d) => {
+    const raw = d.reasonForChoosingInstitute || "Unknown";
+    if (
+      raw === "Unknown" ||
+      raw.trim() === "" ||
+      raw.toLowerCase().trim() === "na" ||
+      raw.toLowerCase().trim() === "none"
+    ) {
+      return;
+    }
+
+    // Usually respondents give various reasons. We'll categorize common ones or use raw
+    let reason = raw.trim();
+    const lower = reason.toLowerCase();
+    
+    if (lower.includes("place") || lower.includes("job")) reason = "Placement/Job";
+    else if (lower.includes("curriculum") || lower.includes("syllabus") || lower.includes("course")) reason = "Curriculum";
+    else if (lower.includes("fee") || lower.includes("price") || lower.includes("cost")) reason = "Affordable Fees";
+    else if (lower.includes("facult") || lower.includes("teacher") || lower.includes("trainer")) reason = "Faculty/Trainers";
+    else if (lower.includes("review") || lower.includes("rating")) reason = "Good Reviews";
+    else if (lower.includes("brand") || lower.includes("name") || lower.includes("reput")) reason = "Brand Reputation";
+    else if (lower.includes("friend") || lower.includes("refer")) reason = "Friend/Referral";
+    else if (reason.length > 25) {
+       reason = reason.substring(0, 22) + "...";
+       reason = reason.charAt(0).toUpperCase() + reason.slice(1);
+    } else {
+       reason = reason.charAt(0).toUpperCase() + reason.slice(1);
+    }
+
+    counts[reason] = (counts[reason] || 0) + 1;
+  });
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1]) // Sort largest first
+    .slice(0, 5) // Top 5
+    .map(([reason, count], i) => {
+      let fill = BAR_COLORS[i % 2];
+      return {
+        reason,
+        count,
+        fill,
+      };
+    });
+}
+
 
 // ─── Trend Over Time ───────────────────────────────────────────────
 export function computeTrends(data: EnrollmentData[]): TrendPoint[] {
