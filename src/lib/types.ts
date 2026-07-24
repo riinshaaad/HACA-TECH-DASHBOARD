@@ -60,6 +60,12 @@ export interface StatusDistribution {
   fill: string;
 }
 
+export interface AgeDistribution {
+  ageGroup: string;
+  count: number;
+  fill: string;
+}
+
 export interface EducationDistribution {
   background: string;
   count: number;

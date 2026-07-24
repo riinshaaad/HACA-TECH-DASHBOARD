@@ -9,6 +9,7 @@ import {
   computeLeadSources,
   computeDistrictDistribution,
   computeGenderDistribution,
+  computeAgeDistribution,
   computeStatusDistribution,
   computeEducationDistribution,
   computeInfluencingContentDistribution,
@@ -33,6 +34,7 @@ import CourseDistributionChart from "@/components/charts/CourseDistributionChart
 import LeadSourceChart from "@/components/charts/LeadSourceChart";
 import DistrictDistributionChart from "@/components/charts/DistrictDistributionChart";
 import GenderDistributionChart from "@/components/charts/GenderDistributionChart";
+import AgeDistributionChart from "@/components/charts/AgeDistributionChart";
 import StatusDistributionChart from "@/components/charts/StatusDistributionChart";
 import TrendChart from "@/components/charts/TrendChart";
 import EducationDistributionChart from "@/components/charts/EducationDistributionChart";
@@ -67,6 +69,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
   const leadSources = useMemo(() => computeLeadSources(filteredData), [filteredData]);
   const districtDist = useMemo(() => computeDistrictDistribution(filteredData), [filteredData]);
   const genderDist = useMemo(() => computeGenderDistribution(filteredData), [filteredData]);
+  const ageDist = useMemo(() => computeAgeDistribution(filteredData), [filteredData]);
   const statusDist = useMemo(() => computeStatusDistribution(filteredData), [filteredData]);
   const trends = useMemo(() => computeTrends(filteredData), [filteredData]);
   const educationDist = useMemo(() => computeEducationDistribution(filteredData), [filteredData]);
@@ -192,6 +195,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <AIInfluenceChart data={aiInfluence} />
               <ReasonForChoosingChart data={reasonForChoosingDist} />
+              <AgeDistributionChart data={ageDist} />
             </div>
 
             {/* Row 7 — Respondent Directory */}

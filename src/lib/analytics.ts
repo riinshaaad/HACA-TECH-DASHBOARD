@@ -4,6 +4,7 @@ import {
   CourseDistribution,
   DistrictDistribution,
   GenderDistribution,
+  AgeDistribution,
   StatusDistribution,
   EducationDistribution,
   InfluencingContentDistribution,
@@ -204,6 +205,26 @@ export function computeGenderDistribution(
         fill,
       };
     });
+}
+
+// ─── Age Distribution ──────────────────────────────────────────────
+export function computeAgeDistribution(
+  data: EnrollmentData[]
+): AgeDistribution[] {
+  const counts: Record<string, number> = {};
+  data.forEach((d) => {
+    if (!d.ageGroup) return;
+    const age = d.ageGroup;
+    counts[age] = (counts[age] || 0) + 1;
+  });
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([ageGroup, count], i) => ({
+      ageGroup,
+      count,
+      fill: BAR_COLORS[i % 2],
+    }));
 }
 
 // ─── Status Distribution ───────────────────────────────────────────
