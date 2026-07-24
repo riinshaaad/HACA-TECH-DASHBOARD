@@ -1,12 +1,59 @@
 "use client";
 
+import { useState } from "react";
 import { CompetitorRank } from "@/lib/types";
 
 interface CompetitorStrategyProps {
   data: CompetitorRank[];
 }
 
+const colors = [
+  { bg: "bg-accent-pink", shadow: "shadow-[0_0_8px_rgba(236,72,153,0.8)]" },
+  { bg: "bg-accent-cyan", shadow: "shadow-[0_0_8px_rgba(34,211,238,0.8)]" },
+  { bg: "bg-accent-emerald", shadow: "shadow-[0_0_8px_rgba(16,185,129,0.8)]" },
+  { bg: "bg-accent-primary", shadow: "shadow-[0_0_8px_rgba(99,102,241,0.8)]" },
+];
+
 export default function CompetitorStrategy({ data }: CompetitorStrategyProps) {
+  const [strategies, setStrategies] = useState([
+    {
+      title: "100% Placement Guarantee",
+      description: "Promising guaranteed jobs regardless of student performance to drive fast admissions.",
+      color: "bg-accent-pink",
+      shadow: "shadow-[0_0_8px_rgba(236,72,153,0.8)]"
+    },
+    {
+      title: "Fake Testimonials",
+      description: "Using stock photos and fabricated success stories on landing pages to build false trust.",
+      color: "bg-accent-cyan",
+      shadow: "shadow-[0_0_8px_rgba(34,211,238,0.8)]"
+    }
+  ]);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newDesc, setNewDesc] = useState("");
+
+  const handleAddStrategy = () => {
+    if (!newTitle.trim()) return;
+    
+    // Pick a color based on current length to cycle through them
+    const colorObj = colors[strategies.length % colors.length];
+    
+    setStrategies([
+      ...strategies,
+      {
+        title: newTitle,
+        description: newDesc,
+        color: colorObj.bg,
+        shadow: colorObj.shadow
+      }
+    ]);
+    
+    setNewTitle("");
+    setNewDesc("");
+    setIsAdding(false);
+  };
+
   return (
     <div className="space-y-10 fade-in-up" id="competitor-strategy">
       
@@ -84,28 +131,59 @@ export default function CompetitorStrategy({ data }: CompetitorStrategyProps) {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
-          <div className="glass-card-static p-5 border border-border/50 rounded-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-3"><span className="flex h-2 w-2 rounded-full bg-accent-pink shadow-[0_0_8px_rgba(236,72,153,0.8)]"></span></div>
-            <h4 className="font-semibold text-text-primary">100% Placement Guarantee</h4>
-            <p className="text-xs text-text-muted mt-2 leading-relaxed">Promising guaranteed jobs regardless of student performance to drive fast admissions.</p>
-          </div>
+          {strategies.map((strategy, idx) => (
+            <div key={idx} className="glass-card-static p-5 border border-border/50 rounded-xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-3"><span className={`flex h-2 w-2 rounded-full ${strategy.color} ${strategy.shadow}`}></span></div>
+              <h4 className="font-semibold text-text-primary">{strategy.title}</h4>
+              <p className="text-xs text-text-muted mt-2 leading-relaxed">{strategy.description}</p>
+            </div>
+          ))}
           
-          <div className="glass-card-static p-5 border border-border/50 rounded-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-3"><span className="flex h-2 w-2 rounded-full bg-accent-cyan shadow-[0_0_8px_rgba(34,211,238,0.8)]"></span></div>
-            <h4 className="font-semibold text-text-primary">Fake Testimonials</h4>
-            <p className="text-xs text-text-muted mt-2 leading-relaxed">Using stock photos and fabricated success stories on landing pages to build false trust.</p>
-          </div>
-          
-          {/* Add Strategy Placeholders */}
-          <button className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border/50 bg-surface-hover/10 p-5 text-text-muted hover:border-accent-primary/50 hover:text-accent-primary hover:bg-accent-primary/5 transition-all min-h-[120px] group">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:scale-110 transition-transform"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span className="text-sm font-semibold">Add Strategy</span>
-          </button>
-          
-          <button className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border/50 bg-surface-hover/10 p-5 text-text-muted hover:border-accent-primary/50 hover:text-accent-primary hover:bg-accent-primary/5 transition-all min-h-[120px] group hidden xl:flex">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:scale-110 transition-transform"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span className="text-sm font-semibold">Add Strategy</span>
-          </button>
+          {isAdding ? (
+            <div className="glass-card-static p-5 border border-accent-primary/50 rounded-xl relative overflow-hidden group flex flex-col gap-3">
+              <input 
+                type="text" 
+                placeholder="Strategy Title" 
+                className="w-full bg-surface-hover/50 border border-border/50 rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-primary/50"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                autoFocus
+              />
+              <textarea 
+                placeholder="Description" 
+                className="w-full bg-surface-hover/50 border border-border/50 rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-accent-primary/50 resize-none min-h-[60px]"
+                value={newDesc}
+                onChange={(e) => setNewDesc(e.target.value)}
+              />
+              <div className="flex gap-2 justify-end mt-1">
+                <button 
+                  onClick={() => {
+                    setIsAdding(false);
+                    setNewTitle("");
+                    setNewDesc("");
+                  }} 
+                  className="text-xs text-text-muted hover:text-text-primary px-2 py-1 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleAddStrategy} 
+                  className="text-xs bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/20 px-3 py-1 rounded-md transition-colors font-medium"
+                  disabled={!newTitle.trim()}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button 
+              onClick={() => setIsAdding(true)}
+              className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border/50 bg-surface-hover/10 p-5 text-text-muted hover:border-accent-primary/50 hover:text-accent-primary hover:bg-accent-primary/5 transition-all min-h-[120px] group"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:scale-110 transition-transform"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span className="text-sm font-semibold">Add Strategy</span>
+            </button>
+          )}
         </div>
       </div>
 
