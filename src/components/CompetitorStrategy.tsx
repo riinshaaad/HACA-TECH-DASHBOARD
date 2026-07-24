@@ -27,6 +27,18 @@ export default function CompetitorStrategy({ data }: CompetitorStrategyProps) {
       description: "Using stock photos and fabricated success stories on landing pages to build false trust.",
       color: "bg-accent-cyan",
       shadow: "shadow-[0_0_8px_rgba(34,211,238,0.8)]"
+    },
+    {
+      title: "One-on-One Training",
+      description: "Providing personalized one-on-one learning sessions to attract students by emphasizing individual attention and customized skill development.",
+      color: "bg-accent-emerald",
+      shadow: "shadow-[0_0_8px_rgba(16,185,129,0.8)]"
+    },
+    {
+      title: "Minimal Placement Design",
+      description: "Using clean colors, simple layouts, and less text to make placement information look more professional and trustworthy.",
+      color: "bg-accent-primary",
+      shadow: "shadow-[0_0_8px_rgba(99,102,241,0.8)]"
     }
   ]);
   const [isAdding, setIsAdding] = useState(false);
