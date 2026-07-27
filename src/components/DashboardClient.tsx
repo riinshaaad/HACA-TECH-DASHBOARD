@@ -45,6 +45,7 @@ import ReasonForChoosingChart from "@/components/charts/ReasonForChoosingChart";
 import RespondentList from "@/components/RespondentList";
 import CompetitorMentions from "@/components/CompetitorMentions";
 import CompetitorStrategy from "@/components/CompetitorStrategy";
+import MarketingStrategy from "@/components/MarketingStrategy";
 import InsightCard from "@/components/InsightCard";
 
 interface DashboardClientProps {
@@ -364,6 +365,22 @@ export default function DashboardClient({ data }: DashboardClientProps) {
             </div>
             
             <CompetitorStrategy data={competitorRank} />
+          </div>
+        )}
+
+        {/* ─── TAB 4: Marketing Strategy ──────────────────────── */}
+        {activeTab === 3 && (
+          <div className="space-y-6" id="marketing-tab">
+            <div className="fade-in-up">
+              <h2 className="text-xl font-bold text-text-primary">
+                HACA Marketing <span className="gradient-text">Strategy Plan</span>
+              </h2>
+              <p className="mt-1 text-sm text-text-muted">
+                Actionable marketing initiatives, channel allocation, and audience targeting derived from enrollment analytics
+              </p>
+            </div>
+
+            <MarketingStrategy data={filteredData} />
           </div>
         )}
       </div>
