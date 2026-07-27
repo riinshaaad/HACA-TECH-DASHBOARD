@@ -134,6 +134,15 @@ export interface FilterState {
   month: string;
   batch: string;
   year: string;
+  gender?: string;
+  ageGroup?: string;
+  leadSource?: string;
+  educationalBackground?: string;
+  seenAds?: string;
+  influencingContent?: string;
+  choseDueToAI?: string;
+  reasonForChoosingInstitute?: string;
+  reviewFrequency?: string;
 }
 
 export interface MonthOption {

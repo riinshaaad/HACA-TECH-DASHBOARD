@@ -14,6 +14,8 @@ import { StatusDistribution } from "@/lib/types";
 
 interface StatusDistributionChartProps {
   data: StatusDistribution[];
+  activeFilter?: string;
+  onSelect?: (value: string) => void;
 }
 
 const CustomTooltip = ({
@@ -35,7 +37,51 @@ const CustomTooltip = ({
   );
 };
 
-export default function StatusDistributionChart({ data }: StatusDistributionChartProps) {
+export default function StatusDistributionChart({
+  data,
+  activeFilter,
+  onSelect,
+}: StatusDistributionChartProps) {
+  const handleClick = (item: any) => {
+    if (!onSelect) return;
+    const val =
+      typeof item === "string"
+        ? item
+        : item?.status || item?.payload?.status;
+    if (val) {
+      onSelect(activeFilter === val ? "All" : val);
+    }
+  };
+
+  if (data.length === 0) {
+    return (
+      <div className="glass-card-static p-5 fade-in-up-delay-5">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-purple/15">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#a855f7"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+          <h3 className="text-sm font-semibold text-text-primary">
+            Current Status
+          </h3>
+        </div>
+        <div className="flex h-64 items-center justify-center">
+          <p className="text-sm text-text-muted">No data available</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="glass-card-static p-5 fade-in-up-delay-5">
       <div className="mb-4 flex items-center gap-2">
@@ -50,12 +96,11 @@ export default function StatusDistributionChart({ data }: StatusDistributionChar
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-            <polyline points="22 4 12 14.01 9 11.01" />
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Status Distribution
+          Current Status
         </h3>
       </div>
       <div className="h-64">
@@ -81,10 +126,32 @@ export default function StatusDistributionChart({ data }: StatusDistributionChar
               content={<CustomTooltip />}
               cursor={{ fill: "rgba(168, 85, 247, 0.05)" }}
             />
-            <Bar dataKey="count" radius={[2, 8, 8, 2]} maxBarSize={30}>
-              {data.map((entry, i) => (
-                <Cell key={i} fill={entry.fill} />
-              ))}
+            <Bar
+              dataKey="count"
+              radius={[2, 8, 8, 2]}
+              maxBarSize={30}
+              onClick={handleClick}
+              className="cursor-pointer"
+            >
+              {data.map((entry, i) => {
+                const isSelected =
+                  !activeFilter ||
+                  activeFilter === "All" ||
+                  activeFilter === entry.status;
+                return (
+                  <Cell
+                    key={i}
+                    fill={entry.fill}
+                    opacity={isSelected ? 1 : 0.35}
+                    stroke={
+                      activeFilter === entry.status ? "#ffffff" : "none"
+                    }
+                    strokeWidth={activeFilter === entry.status ? 2 : 0}
+                    onClick={() => handleClick(entry.status)}
+                    className="cursor-pointer transition-all duration-200"
+                  />
+                );
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>

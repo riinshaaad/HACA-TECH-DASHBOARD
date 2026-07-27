@@ -14,6 +14,8 @@ import { LeadSourceDistribution } from "@/lib/types";
 
 interface LeadSourceChartProps {
   data: LeadSourceDistribution[];
+  activeFilter?: string;
+  onSelect?: (value: string) => void;
 }
 
 const CustomTooltip = ({
@@ -35,7 +37,51 @@ const CustomTooltip = ({
   );
 };
 
-export default function LeadSourceChart({ data }: LeadSourceChartProps) {
+export default function LeadSourceChart({
+  data,
+  activeFilter,
+  onSelect,
+}: LeadSourceChartProps) {
+  const handleClick = (item: any) => {
+    if (!onSelect) return;
+    const val =
+      typeof item === "string"
+        ? item
+        : item?.source || item?.payload?.source;
+    if (val) {
+      onSelect(activeFilter === val ? "All" : val);
+    }
+  };
+
+  if (data.length === 0) {
+    return (
+      <div className="glass-card-static p-5 fade-in-up-delay-3">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-cyan/15">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#06b6d4"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+          <h3 className="text-sm font-semibold text-text-primary">
+            Lead Sources
+          </h3>
+        </div>
+        <div className="flex h-64 items-center justify-center">
+          <p className="text-sm text-text-muted">No data available</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="glass-card-static p-5 fade-in-up-delay-3">
       <div className="mb-4 flex items-center gap-2">
@@ -50,10 +96,7 @@ export default function LeadSourceChart({ data }: LeadSourceChartProps) {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
@@ -83,10 +126,32 @@ export default function LeadSourceChart({ data }: LeadSourceChartProps) {
               content={<CustomTooltip />}
               cursor={{ fill: "rgba(6, 182, 212, 0.05)" }}
             />
-            <Bar dataKey="count" radius={[2, 8, 8, 2]} maxBarSize={30}>
-              {data.map((entry, i) => (
-                <Cell key={i} fill={entry.fill} />
-              ))}
+            <Bar
+              dataKey="count"
+              radius={[2, 8, 8, 2]}
+              maxBarSize={30}
+              onClick={handleClick}
+              className="cursor-pointer"
+            >
+              {data.map((entry, i) => {
+                const isSelected =
+                  !activeFilter ||
+                  activeFilter === "All" ||
+                  activeFilter === entry.source;
+                return (
+                  <Cell
+                    key={i}
+                    fill={entry.fill}
+                    opacity={isSelected ? 1 : 0.35}
+                    stroke={
+                      activeFilter === entry.source ? "#ffffff" : "none"
+                    }
+                    strokeWidth={activeFilter === entry.source ? 2 : 0}
+                    onClick={() => handleClick(entry.source)}
+                    className="cursor-pointer transition-all duration-200"
+                  />
+                );
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>

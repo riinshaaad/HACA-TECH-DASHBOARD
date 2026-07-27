@@ -54,6 +54,97 @@ export function applyFilters(
         return false;
       }
     }
+
+    // Chart slicer filters:
+    if (filters.gender && filters.gender !== "All") {
+      let g = "Other";
+      const rawG = (d.gender || "").toLowerCase();
+      if (rawG.startsWith("m")) g = "Male";
+      else if (rawG.startsWith("f")) g = "Female";
+      if (g !== filters.gender) return false;
+    }
+    if (
+      filters.ageGroup &&
+      filters.ageGroup !== "All" &&
+      d.ageGroup !== filters.ageGroup
+    ) {
+      return false;
+    }
+    if (filters.leadSource && filters.leadSource !== "All") {
+      let source = d.howDidYouHear || "Unknown";
+      if (source.toLowerCase().includes("friend")) source = "Friend / Family";
+      if (source.toLowerCase().includes("instagram")) source = "Instagram";
+      if (source !== filters.leadSource) return false;
+    }
+    if (
+      filters.educationalBackground &&
+      filters.educationalBackground !== "All"
+    ) {
+      let bg = (d.educationalBackground || "Unknown").trim();
+      bg = bg.replace(/\b\w/g, (c) => c.toUpperCase());
+      if (bg.length > 20) {
+        bg = bg.substring(0, 18) + "…";
+      }
+      if (bg !== filters.educationalBackground) return false;
+    }
+    if (filters.seenAds && filters.seenAds !== "All") {
+      let ans = (d.seenAds || "Unknown").trim();
+      if (ans.toLowerCase().startsWith("yes")) ans = "Yes";
+      else if (ans.toLowerCase().startsWith("no")) ans = "No";
+      else ans = ans.charAt(0).toUpperCase() + ans.slice(1);
+      if (ans !== filters.seenAds) return false;
+    }
+    if (filters.influencingContent && filters.influencingContent !== "All") {
+      const lower = (d.influencingContent || "").toLowerCase();
+      let matches = false;
+      if (filters.influencingContent === "Informative" && lower.includes("inform")) matches = true;
+      else if (filters.influencingContent === "Testimony" && lower.includes("testim")) matches = true;
+      else if (filters.influencingContent === "Life at HACA" && lower.includes("life") && lower.includes("haca")) matches = true;
+      else {
+        let other = (d.influencingContent || "").trim();
+        if (other.length > 25) {
+          other = other.substring(0, 22) + "...";
+        }
+        other = other.charAt(0).toUpperCase() + other.slice(1);
+        if (other === filters.influencingContent) matches = true;
+      }
+      if (!matches) return false;
+    }
+    if (filters.choseDueToAI && filters.choseDueToAI !== "All") {
+      let ans = (d.choseDueToAI || "Unknown").trim();
+      if (ans.toLowerCase().startsWith("yes")) ans = "Yes";
+      else if (ans.toLowerCase().startsWith("no")) ans = "No";
+      else ans = ans.charAt(0).toUpperCase() + ans.slice(1);
+      if (ans !== filters.choseDueToAI) return false;
+    }
+    if (
+      filters.reasonForChoosingInstitute &&
+      filters.reasonForChoosingInstitute !== "All"
+    ) {
+      let reason = (d.reasonForChoosingInstitute || "").trim();
+      const lower = reason.toLowerCase();
+      if (lower.includes("place") || lower.includes("job")) reason = "Placement/Job";
+      else if (lower.includes("curriculum") || lower.includes("syllabus") || lower.includes("course")) reason = "Curriculum";
+      else if (lower.includes("fee") || lower.includes("price") || lower.includes("cost")) reason = "Affordable Fees";
+      else if (lower.includes("facult") || lower.includes("teacher") || lower.includes("trainer")) reason = "Faculty/Trainers";
+      else if (lower.includes("review") || lower.includes("rating")) reason = "Good Reviews";
+      else if (lower.includes("brand") || lower.includes("name") || lower.includes("reput")) reason = "Brand Reputation";
+      else if (lower.includes("friend") || lower.includes("refer")) reason = "Friend/Referral";
+      else if (reason.length > 25) {
+        reason = reason.substring(0, 22) + "...";
+        reason = reason.charAt(0).toUpperCase() + reason.slice(1);
+      } else {
+        reason = reason.charAt(0).toUpperCase() + reason.slice(1);
+      }
+      if (reason !== filters.reasonForChoosingInstitute) return false;
+    }
+    if (filters.reviewFrequency && filters.reviewFrequency !== "All") {
+      let answer = (d.reviewFrequency || "Unknown").trim();
+      if (answer !== "Unknown" && answer !== "") {
+        answer = answer.charAt(0).toUpperCase() + answer.slice(1);
+      }
+      if (answer !== filters.reviewFrequency) return false;
+    }
     return true;
   });
 }
@@ -219,7 +310,7 @@ export function computeAgeDistribution(
   });
 
   return Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([ageGroup, count], i) => ({
       ageGroup,
       count,

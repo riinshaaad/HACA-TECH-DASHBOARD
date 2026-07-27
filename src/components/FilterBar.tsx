@@ -42,12 +42,7 @@ export default function FilterBar({
         <span className="text-sm font-semibold text-text-primary">
           Filter Data
         </span>
-        {(filters.course !== "All" ||
-          filters.district !== "All" ||
-          filters.currentStatus !== "All" ||
-          filters.month !== "All" ||
-          filters.batch !== "All" ||
-          filters.year !== "All") && (
+        {Object.values(filters).some((val) => val && val !== "All") && (
           <button
             id="clear-filters"
             onClick={() =>
@@ -58,6 +53,15 @@ export default function FilterBar({
                 month: "All",
                 batch: "All",
                 year: "All",
+                gender: "All",
+                ageGroup: "All",
+                leadSource: "All",
+                educationalBackground: "All",
+                seenAds: "All",
+                influencingContent: "All",
+                choseDueToAI: "All",
+                reasonForChoosingInstitute: "All",
+                reviewFrequency: "All",
               })
             }
             className="ml-auto rounded-lg bg-accent-primary/10 px-2.5 py-1 text-xs font-medium text-accent-primary transition-colors hover:bg-accent-primary/20"

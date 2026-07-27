@@ -11,6 +11,8 @@ import { AIInfluenceDistribution } from "@/lib/types";
 
 interface AIInfluenceChartProps {
   data: AIInfluenceDistribution[];
+  activeFilter?: string;
+  onSelect?: (value: string) => void;
 }
 
 const CustomTooltip = ({
@@ -34,7 +36,22 @@ const CustomTooltip = ({
   );
 };
 
-export default function AIInfluenceChart({ data }: AIInfluenceChartProps) {
+export default function AIInfluenceChart({
+  data,
+  activeFilter,
+  onSelect,
+}: AIInfluenceChartProps) {
+  const handleClick = (item: any) => {
+    if (!onSelect) return;
+    const val =
+      typeof item === "string"
+        ? item
+        : item?.answer || item?.payload?.answer;
+    if (val) {
+      onSelect(activeFilter === val ? "All" : val);
+    }
+  };
+
   if (data.length === 0) {
     return (
       <div className="glass-card-static p-5 fade-in-up-delay-3">
@@ -50,11 +67,12 @@ export default function AIInfluenceChart({ data }: AIInfluenceChartProps) {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
+              <circle cx="12" cy="10" r="3" />
             </svg>
           </div>
           <h3 className="text-sm font-semibold text-text-primary">
-            Impact of AI Branding
+            Chose Due to AI Focus
           </h3>
         </div>
         <div className="flex h-56 items-center justify-center">
@@ -78,13 +96,12 @@ export default function AIInfluenceChart({ data }: AIInfluenceChartProps) {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-            <line x1="12" y1="22.08" x2="12" y2="12" />
+            <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
+            <circle cx="12" cy="10" r="3" />
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Impact of AI Branding
+          Chose Due to AI Focus
         </h3>
       </div>
 
@@ -101,10 +118,28 @@ export default function AIInfluenceChart({ data }: AIInfluenceChartProps) {
                 paddingAngle={3}
                 dataKey="count"
                 strokeWidth={0}
+                onClick={handleClick}
+                className="cursor-pointer"
               >
-                {data.map((entry, i) => (
-                  <Cell key={i} fill={entry.fill} />
-                ))}
+                {data.map((entry, i) => {
+                  const isSelected =
+                    !activeFilter ||
+                    activeFilter === "All" ||
+                    activeFilter === entry.answer;
+                  return (
+                    <Cell
+                      key={i}
+                      fill={entry.fill}
+                      opacity={isSelected ? 1 : 0.35}
+                      stroke={
+                        activeFilter === entry.answer ? "#ffffff" : "none"
+                      }
+                      strokeWidth={activeFilter === entry.answer ? 2 : 0}
+                      onClick={() => handleClick(entry.answer)}
+                      className="cursor-pointer transition-all duration-200"
+                    />
+                  );
+                })}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
@@ -112,25 +147,39 @@ export default function AIInfluenceChart({ data }: AIInfluenceChartProps) {
         </div>
 
         <div className="grid w-full grid-cols-1 gap-2">
-          {data.map((item) => (
-            <div
-              key={item.answer}
-              className="flex items-center gap-2 rounded-lg bg-surface-hover/50 px-3 py-2"
-            >
-              <span
-                className="h-3 w-3 flex-shrink-0 rounded-full"
-                style={{ backgroundColor: item.fill }}
-              />
-              <div className="flex flex-1 items-center justify-between min-w-0">
-                <p className="truncate text-sm font-medium text-text-primary">
-                  {item.answer}
-                </p>
-                <p className="text-xs font-bold text-text-secondary">
-                  {item.count}
-                </p>
+          {data.map((item) => {
+            const isSelected = activeFilter === item.answer;
+            const isDimmed =
+              activeFilter &&
+              activeFilter !== "All" &&
+              activeFilter !== item.answer;
+            return (
+              <div
+                key={item.answer}
+                onClick={() => handleClick(item.answer)}
+                className={`cursor-pointer flex items-center gap-2 rounded-lg px-3 py-2 transition-all ${
+                  isSelected
+                    ? "bg-accent-primary/25 border border-accent-primary/50 shadow-sm"
+                    : isDimmed
+                    ? "bg-surface-hover/20 opacity-50 hover:opacity-80"
+                    : "bg-surface-hover/50 hover:bg-surface-hover"
+                }`}
+              >
+                <span
+                  className="h-3 w-3 flex-shrink-0 rounded-full"
+                  style={{ backgroundColor: item.fill }}
+                />
+                <div className="flex flex-1 items-center justify-between min-w-0">
+                  <p className="truncate text-sm font-medium text-text-primary">
+                    {item.answer}
+                  </p>
+                  <p className="text-xs font-bold text-text-secondary">
+                    {item.count}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

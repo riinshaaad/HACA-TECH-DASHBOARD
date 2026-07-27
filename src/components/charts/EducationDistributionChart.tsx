@@ -14,6 +14,8 @@ import { EducationDistribution } from "@/lib/types";
 
 interface EducationDistributionChartProps {
   data: EducationDistribution[];
+  activeFilter?: string;
+  onSelect?: (value: string) => void;
 }
 
 const CustomTooltip = ({
@@ -37,7 +39,22 @@ const CustomTooltip = ({
   );
 };
 
-export default function EducationDistributionChart({ data }: EducationDistributionChartProps) {
+export default function EducationDistributionChart({
+  data,
+  activeFilter,
+  onSelect,
+}: EducationDistributionChartProps) {
+  const handleClick = (item: any) => {
+    if (!onSelect) return;
+    const val =
+      typeof item === "string"
+        ? item
+        : item?.background || item?.payload?.background;
+    if (val) {
+      onSelect(activeFilter === val ? "All" : val);
+    }
+  };
+
   if (data.length === 0) {
     return (
       <div className="glass-card-static p-5 fade-in-up-delay-4">
@@ -61,8 +78,8 @@ export default function EducationDistributionChart({ data }: EducationDistributi
             Student Educational Background
           </h3>
         </div>
-        <div className="flex h-64 items-center justify-center">
-          <p className="text-sm text-text-muted">No education data available</p>
+        <div className="flex h-72 items-center justify-center">
+          <p className="text-sm text-text-muted">No data available</p>
         </div>
       </div>
     );
@@ -116,10 +133,33 @@ export default function EducationDistributionChart({ data }: EducationDistributi
               content={<CustomTooltip />}
               cursor={{ fill: "rgba(123, 92, 250, 0.05)" }}
             />
-            <Bar dataKey="count" radius={[2, 8, 8, 2]} maxBarSize={25}>
-              {data.map((entry, i) => (
-                <Cell key={i} fill={i % 2 === 0 ? "#7b5cfa" : "#9b6bff"} />
-              ))}
+            <Bar
+              dataKey="count"
+              radius={[2, 8, 8, 2]}
+              maxBarSize={25}
+              onClick={handleClick}
+              className="cursor-pointer"
+            >
+              {data.map((entry, i) => {
+                const isSelected =
+                  !activeFilter ||
+                  activeFilter === "All" ||
+                  activeFilter === entry.background;
+                const baseColor = i % 2 === 0 ? "#7b5cfa" : "#9b6bff";
+                return (
+                  <Cell
+                    key={i}
+                    fill={baseColor}
+                    opacity={isSelected ? 1 : 0.35}
+                    stroke={
+                      activeFilter === entry.background ? "#ffffff" : "none"
+                    }
+                    strokeWidth={activeFilter === entry.background ? 2 : 0}
+                    onClick={() => handleClick(entry.background)}
+                    className="cursor-pointer transition-all duration-200"
+                  />
+                );
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>

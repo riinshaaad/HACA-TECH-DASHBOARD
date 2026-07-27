@@ -14,6 +14,8 @@ import { DistrictDistribution } from "@/lib/types";
 
 interface DistrictDistributionChartProps {
   data: DistrictDistribution[];
+  activeFilter?: string;
+  onSelect?: (value: string) => void;
 }
 
 const CustomTooltip = ({
@@ -35,7 +37,52 @@ const CustomTooltip = ({
   );
 };
 
-export default function DistrictDistributionChart({ data }: DistrictDistributionChartProps) {
+export default function DistrictDistributionChart({
+  data,
+  activeFilter,
+  onSelect,
+}: DistrictDistributionChartProps) {
+  const handleClick = (item: any) => {
+    if (!onSelect) return;
+    const val =
+      typeof item === "string"
+        ? item
+        : item?.district || item?.payload?.district;
+    if (val) {
+      onSelect(activeFilter === val ? "All" : val);
+    }
+  };
+
+  if (data.length === 0) {
+    return (
+      <div className="glass-card-static p-5 fade-in-up-delay-2">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-emerald/15">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+          <h3 className="text-sm font-semibold text-text-primary">
+            District Distribution
+          </h3>
+        </div>
+        <div className="flex h-56 items-center justify-center">
+          <p className="text-sm text-text-muted">No data available</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="glass-card-static p-5 fade-in-up-delay-2">
       <div className="mb-4 flex items-center gap-2">
@@ -58,6 +105,7 @@ export default function DistrictDistributionChart({ data }: DistrictDistribution
           District Distribution
         </h3>
       </div>
+
       <div
         className="custom-scrollbar overflow-x-auto pb-2"
       >
@@ -86,10 +134,32 @@ export default function DistrictDistributionChart({ data }: DistrictDistribution
                 content={<CustomTooltip />}
                 cursor={{ fill: "rgba(16, 185, 129, 0.05)" }}
               />
-              <Bar dataKey="count" radius={[8, 8, 2, 2]} maxBarSize={30}>
-                {data.map((entry, i) => (
-                  <Cell key={i} fill={entry.fill} />
-                ))}
+              <Bar
+                dataKey="count"
+                radius={[8, 8, 2, 2]}
+                maxBarSize={30}
+                onClick={handleClick}
+                className="cursor-pointer"
+              >
+                {data.map((entry, i) => {
+                  const isSelected =
+                    !activeFilter ||
+                    activeFilter === "All" ||
+                    activeFilter === entry.district;
+                  return (
+                    <Cell
+                      key={i}
+                      fill={entry.fill}
+                      opacity={isSelected ? 1 : 0.35}
+                      stroke={
+                        activeFilter === entry.district ? "#ffffff" : "none"
+                      }
+                      strokeWidth={activeFilter === entry.district ? 2 : 0}
+                      onClick={() => handleClick(entry.district)}
+                      className="cursor-pointer transition-all duration-200"
+                    />
+                  );
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>

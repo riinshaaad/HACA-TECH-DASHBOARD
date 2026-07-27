@@ -11,6 +11,8 @@ import { GenderDistribution } from "@/lib/types";
 
 interface GenderDistributionChartProps {
   data: GenderDistribution[];
+  activeFilter?: string;
+  onSelect?: (value: string) => void;
 }
 
 const CustomTooltip = ({
@@ -34,9 +36,52 @@ const CustomTooltip = ({
   );
 };
 
-export default function GenderDistributionChart({ data }: GenderDistributionChartProps) {
+export default function GenderDistributionChart({
+  data,
+  activeFilter,
+  onSelect,
+}: GenderDistributionChartProps) {
+  const handleClick = (item: any) => {
+    if (!onSelect) return;
+    const val =
+      typeof item === "string" ? item : item?.gender || item?.payload?.gender;
+    if (val) {
+      onSelect(activeFilter === val ? "All" : val);
+    }
+  };
+
+  if (data.length === 0) {
+    return (
+      <div className="glass-card-static p-5 fade-in-up-delay-2">
+        <div className="mb-4 flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-pink/15">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ec4899"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <h3 className="text-sm font-semibold text-text-primary">
+            Gender Distribution
+          </h3>
+        </div>
+        <div className="flex h-56 items-center justify-center">
+          <p className="text-sm text-text-muted">No data available</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="glass-card-static p-5 fade-in-up-delay-5">
+    <div className="glass-card-static p-5 fade-in-up-delay-2">
       <div className="mb-4 flex items-center gap-2">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-pink/15">
           <svg
@@ -66,39 +111,73 @@ export default function GenderDistributionChart({ data }: GenderDistributionChar
                 data={data}
                 cx="50%"
                 cy="50%"
+                innerRadius={50}
                 outerRadius={80}
+                paddingAngle={3}
                 dataKey="count"
                 strokeWidth={0}
+                onClick={handleClick}
+                className="cursor-pointer"
               >
-                {data.map((entry, i) => (
-                  <Cell key={i} fill={entry.fill} />
-                ))}
+                {data.map((entry, i) => {
+                  const isSelected =
+                    !activeFilter ||
+                    activeFilter === "All" ||
+                    activeFilter === entry.gender;
+                  return (
+                    <Cell
+                      key={i}
+                      fill={entry.fill}
+                      opacity={isSelected ? 1 : 0.35}
+                      stroke={
+                        activeFilter === entry.gender ? "#ffffff" : "none"
+                      }
+                      strokeWidth={activeFilter === entry.gender ? 2 : 0}
+                      onClick={() => handleClick(entry.gender)}
+                      className="cursor-pointer transition-all duration-200"
+                    />
+                  );
+                })}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="grid w-full grid-cols-1 gap-2 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
-          {data.map((item) => (
-            <div
-              key={item.gender}
-              className="flex items-center gap-2 rounded-lg bg-surface-hover/50 px-3 py-2"
-            >
-              <span
-                className="h-3 w-3 flex-shrink-0 rounded-full"
-                style={{ backgroundColor: item.fill }}
-              />
-              <div className="flex flex-1 items-center justify-between min-w-0">
-                <p className="truncate text-sm font-medium text-text-primary">
-                  {item.gender}
-                </p>
-                <p className="text-xs font-bold text-text-secondary">
-                  {item.count}
-                </p>
+        <div className="grid w-full grid-cols-1 gap-2">
+          {data.map((item) => {
+            const isSelected = activeFilter === item.gender;
+            const isDimmed =
+              activeFilter &&
+              activeFilter !== "All" &&
+              activeFilter !== item.gender;
+            return (
+              <div
+                key={item.gender}
+                onClick={() => handleClick(item.gender)}
+                className={`cursor-pointer flex items-center gap-2 rounded-lg px-3 py-2 transition-all ${
+                  isSelected
+                    ? "bg-accent-primary/25 border border-accent-primary/50 shadow-sm"
+                    : isDimmed
+                    ? "bg-surface-hover/20 opacity-50 hover:opacity-80"
+                    : "bg-surface-hover/50 hover:bg-surface-hover"
+                }`}
+              >
+                <span
+                  className="h-3 w-3 flex-shrink-0 rounded-full"
+                  style={{ backgroundColor: item.fill }}
+                />
+                <div className="flex flex-1 items-center justify-between min-w-0">
+                  <p className="truncate text-sm font-medium text-text-primary">
+                    {item.gender}
+                  </p>
+                  <p className="text-xs font-bold text-text-secondary">
+                    {item.count}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

@@ -14,6 +14,8 @@ import { InfluencingContentDistribution } from "@/lib/types";
 
 interface InfluencingContentChartProps {
   data: InfluencingContentDistribution[];
+  activeFilter?: string;
+  onSelect?: (value: string) => void;
 }
 
 const CustomTooltip = ({
@@ -35,7 +37,22 @@ const CustomTooltip = ({
   );
 };
 
-export default function InfluencingContentChart({ data }: InfluencingContentChartProps) {
+export default function InfluencingContentChart({
+  data,
+  activeFilter,
+  onSelect,
+}: InfluencingContentChartProps) {
+  const handleClick = (item: any) => {
+    if (!onSelect) return;
+    const val =
+      typeof item === "string"
+        ? item
+        : item?.content || item?.payload?.content;
+    if (val) {
+      onSelect(activeFilter === val ? "All" : val);
+    }
+  };
+
   if (data.length === 0) {
     return (
       <div className="glass-card-static p-5 fade-in-up-delay-3">
@@ -60,7 +77,7 @@ export default function InfluencingContentChart({ data }: InfluencingContentChar
           </h3>
         </div>
         <div className="flex h-64 items-center justify-center">
-          <p className="text-sm text-text-muted">No content data available</p>
+          <p className="text-sm text-text-muted">No data available</p>
         </div>
       </div>
     );
@@ -111,10 +128,32 @@ export default function InfluencingContentChart({ data }: InfluencingContentChar
               content={<CustomTooltip />}
               cursor={{ fill: "rgba(123, 92, 250, 0.05)" }}
             />
-            <Bar dataKey="count" radius={[2, 8, 8, 2]} maxBarSize={30}>
-              {data.map((entry, i) => (
-                <Cell key={i} fill={entry.fill} />
-              ))}
+            <Bar
+              dataKey="count"
+              radius={[2, 8, 8, 2]}
+              maxBarSize={30}
+              onClick={handleClick}
+              className="cursor-pointer"
+            >
+              {data.map((entry, i) => {
+                const isSelected =
+                  !activeFilter ||
+                  activeFilter === "All" ||
+                  activeFilter === entry.content;
+                return (
+                  <Cell
+                    key={i}
+                    fill={entry.fill}
+                    opacity={isSelected ? 1 : 0.35}
+                    stroke={
+                      activeFilter === entry.content ? "#ffffff" : "none"
+                    }
+                    strokeWidth={activeFilter === entry.content ? 2 : 0}
+                    onClick={() => handleClick(entry.content)}
+                    className="cursor-pointer transition-all duration-200"
+                  />
+                );
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>

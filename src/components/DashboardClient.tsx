@@ -172,30 +172,105 @@ export default function DashboardClient({ data }: DashboardClientProps) {
 
             {/* Charts Row 1 */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <CourseDistributionChart data={courseDist} />
-              <GenderDistributionChart data={genderDist} />
-              <LeadSourceChart data={leadSources} />
+              <CourseDistributionChart
+                data={courseDist}
+                activeFilter={filters.course}
+                onSelect={(val) =>
+                  setFilters((prev) => ({ ...prev, course: val }))
+                }
+              />
+              <GenderDistributionChart
+                data={genderDist}
+                activeFilter={filters.gender}
+                onSelect={(val) =>
+                  setFilters((prev) => ({ ...prev, gender: val }))
+                }
+              />
+              <AgeDistributionChart
+                data={ageDist}
+                activeFilter={filters.ageGroup}
+                onSelect={(val) =>
+                  setFilters((prev) => ({ ...prev, ageGroup: val }))
+                }
+              />
             </div>
 
             {/* Charts Row 2 */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <DistrictDistributionChart data={districtDist} />
+              <DistrictDistributionChart
+                data={districtDist}
+                activeFilter={filters.district}
+                onSelect={(val) =>
+                  setFilters((prev) => ({ ...prev, district: val }))
+                }
+              />
               <TrendChart data={trends} />
-              <StatusDistributionChart data={statusDist} />
+              <StatusDistributionChart
+                data={statusDist}
+                activeFilter={filters.currentStatus}
+                onSelect={(val) =>
+                  setFilters((prev) => ({ ...prev, currentStatus: val }))
+                }
+              />
             </div>
 
             {/* Charts Row 3 */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <EducationDistributionChart data={educationDist} />
-              <SeenAdsChart data={seenAds} />
-              <InfluencingContentChart data={influencingContent} />
+              <EducationDistributionChart
+                data={educationDist}
+                activeFilter={filters.educationalBackground}
+                onSelect={(val) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    educationalBackground: val,
+                  }))
+                }
+              />
+              <SeenAdsChart
+                data={seenAds}
+                activeFilter={filters.seenAds}
+                onSelect={(val) =>
+                  setFilters((prev) => ({ ...prev, seenAds: val }))
+                }
+              />
+              <InfluencingContentChart
+                data={influencingContent}
+                activeFilter={filters.influencingContent}
+                onSelect={(val) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    influencingContent: val,
+                  }))
+                }
+              />
             </div>
 
             {/* Charts Row 4 */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <AIInfluenceChart data={aiInfluence} />
-              <ReasonForChoosingChart data={reasonForChoosingDist} />
-              <AgeDistributionChart data={ageDist} />
+              <AIInfluenceChart
+                data={aiInfluence}
+                activeFilter={filters.choseDueToAI}
+                onSelect={(val) =>
+                  setFilters((prev) => ({ ...prev, choseDueToAI: val }))
+                }
+              />
+              <ReasonForChoosingChart
+                data={reasonForChoosingDist}
+                activeFilter={filters.reasonForChoosingInstitute}
+                onSelect={(val) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    reasonForChoosingInstitute: val,
+                  }))
+                }
+              />
+              <LeadSourceChart
+                data={leadSources}
+                activeFilter={filters.leadSource}
+                onSelect={(val) =>
+                  setFilters((prev) => ({ ...prev, leadSource: val }))
+                }
+              />
             </div>
 
             {/* Row 7 — Respondent Directory */}
@@ -204,11 +279,7 @@ export default function DashboardClient({ data }: DashboardClientProps) {
             </div>
 
             {/* Filtered Count Banner */}
-            {(filters.course !== "All" ||
-              filters.district !== "All" ||
-              filters.currentStatus !== "All" ||
-              filters.month !== "All" ||
-              filters.batch !== "All") && (
+            {Object.values(filters).some((val) => val && val !== "All") && (
               <div className="fade-in-up rounded-xl border border-accent-primary/20 bg-accent-primary/5 px-4 py-3 text-center text-sm text-text-secondary">
                 Showing{" "}
                 <span className="font-bold text-accent-primary">

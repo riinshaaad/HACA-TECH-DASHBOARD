@@ -11,6 +11,8 @@ import { ReviewFrequencyDistribution } from "@/lib/types";
 
 interface ReviewFrequencyChartProps {
   data: ReviewFrequencyDistribution[];
+  activeFilter?: string;
+  onSelect?: (value: string) => void;
 }
 
 const CustomTooltip = ({
@@ -34,7 +36,22 @@ const CustomTooltip = ({
   );
 };
 
-export default function ReviewFrequencyChart({ data }: ReviewFrequencyChartProps) {
+export default function ReviewFrequencyChart({
+  data,
+  activeFilter,
+  onSelect,
+}: ReviewFrequencyChartProps) {
+  const handleClick = (item: any) => {
+    if (!onSelect) return;
+    const val =
+      typeof item === "string"
+        ? item
+        : item?.answer || item?.payload?.answer;
+    if (val) {
+      onSelect(activeFilter === val ? "All" : val);
+    }
+  };
+
   if (data.length === 0) {
     return (
       <div className="glass-card-static p-5 fade-in-up-delay-3">
@@ -50,12 +67,12 @@ export default function ReviewFrequencyChart({ data }: ReviewFrequencyChartProps
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              <path d="M12 8v4l3 3" />
             </svg>
           </div>
           <h3 className="text-sm font-semibold text-text-primary">
-            Power of Peer Reviews
+            Frequency of Reading Reviews
           </h3>
         </div>
         <div className="flex h-56 items-center justify-center">
@@ -79,12 +96,12 @@ export default function ReviewFrequencyChart({ data }: ReviewFrequencyChartProps
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            <path d="M12 8v4l3 3" />
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Power of Peer Reviews
+          Frequency of Reading Reviews
         </h3>
       </div>
 
@@ -101,10 +118,28 @@ export default function ReviewFrequencyChart({ data }: ReviewFrequencyChartProps
                 paddingAngle={3}
                 dataKey="count"
                 strokeWidth={0}
+                onClick={handleClick}
+                className="cursor-pointer"
               >
-                {data.map((entry, i) => (
-                  <Cell key={i} fill={entry.fill} />
-                ))}
+                {data.map((entry, i) => {
+                  const isSelected =
+                    !activeFilter ||
+                    activeFilter === "All" ||
+                    activeFilter === entry.answer;
+                  return (
+                    <Cell
+                      key={i}
+                      fill={entry.fill}
+                      opacity={isSelected ? 1 : 0.35}
+                      stroke={
+                        activeFilter === entry.answer ? "#ffffff" : "none"
+                      }
+                      strokeWidth={activeFilter === entry.answer ? 2 : 0}
+                      onClick={() => handleClick(entry.answer)}
+                      className="cursor-pointer transition-all duration-200"
+                    />
+                  );
+                })}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
@@ -112,25 +147,39 @@ export default function ReviewFrequencyChart({ data }: ReviewFrequencyChartProps
         </div>
 
         <div className="grid w-full grid-cols-1 gap-2">
-          {data.map((item) => (
-            <div
-              key={item.answer}
-              className="flex items-center gap-2 rounded-lg bg-surface-hover/50 px-3 py-2"
-            >
-              <span
-                className="h-3 w-3 flex-shrink-0 rounded-full"
-                style={{ backgroundColor: item.fill }}
-              />
-              <div className="flex flex-1 items-center justify-between min-w-0">
-                <p className="truncate text-sm font-medium text-text-primary">
-                  {item.answer}
-                </p>
-                <p className="text-xs font-bold text-text-secondary">
-                  {item.count}
-                </p>
+          {data.map((item) => {
+            const isSelected = activeFilter === item.answer;
+            const isDimmed =
+              activeFilter &&
+              activeFilter !== "All" &&
+              activeFilter !== item.answer;
+            return (
+              <div
+                key={item.answer}
+                onClick={() => handleClick(item.answer)}
+                className={`cursor-pointer flex items-center gap-2 rounded-lg px-3 py-2 transition-all ${
+                  isSelected
+                    ? "bg-accent-primary/25 border border-accent-primary/50 shadow-sm"
+                    : isDimmed
+                    ? "bg-surface-hover/20 opacity-50 hover:opacity-80"
+                    : "bg-surface-hover/50 hover:bg-surface-hover"
+                }`}
+              >
+                <span
+                  className="h-3 w-3 flex-shrink-0 rounded-full"
+                  style={{ backgroundColor: item.fill }}
+                />
+                <div className="flex flex-1 items-center justify-between min-w-0">
+                  <p className="truncate text-sm font-medium text-text-primary">
+                    {item.answer}
+                  </p>
+                  <p className="text-xs font-bold text-text-secondary">
+                    {item.count}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
