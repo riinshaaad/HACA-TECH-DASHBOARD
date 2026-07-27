@@ -1,9 +1,12 @@
 "use client";
 
+import Link from "next/link";
+
 interface TabNavigationProps {
   activeTab: number;
   onTabChange: (tab: number) => void;
 }
+
 
 const tabs = [
   {
@@ -129,6 +132,29 @@ export default function TabNavigation({
             )}
           </button>
         ))}
+
+        {/* Dedicated Insights Page Button */}
+        <Link
+          href="/insights"
+          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-primary to-accent-primary-hover px-4 py-3 text-sm font-bold text-white shadow-lg transition-all hover:opacity-95 hover:scale-[1.02] border border-accent-primary/40"
+          title="Open Data-Driven Insights & Executive Report"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-amber-300"
+          >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          <span className="hidden md:inline">Executive Insights</span>
+          <span className="md:hidden">Insights →</span>
+        </Link>
       </nav>
     </div>
   );

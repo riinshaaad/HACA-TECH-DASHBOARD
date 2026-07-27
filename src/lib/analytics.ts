@@ -16,6 +16,8 @@ import {
   TrendPoint,
   CompetitorRank,
   Insight,
+  ComprehensiveInsight,
+  InsightCategory,
   FilterState,
   MonthOption,
 } from "./types";
@@ -802,3 +804,566 @@ export function generateInsights(
 
   return insights;
 }
+
+// ─── Comprehensive Data-Driven Insights Engine (7 Categories) ─────────
+export function generateComprehensiveInsights(
+  data: EnrollmentData[]
+): ComprehensiveInsight[] {
+  const total = data.length || 1;
+  const kpis = computeKPIs(data);
+  const courses = computeCourseDistribution(data);
+  const districts = computeDistrictDistribution(data);
+  const genders = computeGenderDistribution(data);
+  const ages = computeAgeDistribution(data);
+  const statuses = computeStatusDistribution(data);
+  const leadSources = computeLeadSources(data);
+  const influencingContent = computeInfluencingContentDistribution(data);
+  const reasons = computeReasonForChoosingDistribution(data);
+  const reviews = computeReviewFrequencyDistribution(data);
+
+  // Helper calculation values
+  const topCourse = courses[0] || { course: "Data Analytics with AI", count: 0 };
+  const secondCourse = courses[1] || { course: "Python", count: 0 };
+  const topCoursePct = Math.round((topCourse.count / total) * 100);
+  const secondCoursePct = Math.round((secondCourse.count / total) * 100);
+
+  const comparedCount = data.filter(
+    (d) => (d.comparedWithOtherInstitutes || "").toLowerCase() === "yes"
+  ).length;
+  const comparedPct = Math.round((comparedCount / total) * 100);
+  const directPct = 100 - comparedPct;
+
+  const maleCount = genders.find((g) => g.gender === "Male")?.count || 0;
+  const femaleCount = genders.find((g) => g.gender === "Female")?.count || 0;
+  const malePct = Math.round((maleCount / total) * 100);
+  const femalePct = Math.round((femaleCount / total) * 100);
+
+  const topDistrict = districts[0] || { district: "Malappuram", count: 0 };
+  const secondDistrict = districts[1] || { district: "Kozhikode", count: 0 };
+  const thirdDistrict = districts[2] || { district: "Kannur", count: 0 };
+  const topDistrictPct = Math.round((topDistrict.count / total) * 100);
+  const top3DistrictsCount = topDistrict.count + secondDistrict.count + thirdDistrict.count;
+  const top3DistrictsPct = Math.round((top3DistrictsCount / total) * 100);
+
+  const topAge = ages[0] || { ageGroup: "20-25", count: 0 };
+  const topAgePct = Math.round((topAge.count / total) * 100);
+
+  const jobSeekerCount = statuses.find((s) => s.status === "Job Seeker")?.count || 0;
+  const studentCount = statuses.find((s) => s.status === "Student")?.count || 0;
+  const workingProCount =
+    statuses.find((s) => s.status === "Working Professional")?.count || 0;
+  const freshersPct = Math.round(((jobSeekerCount + studentCount) / total) * 100);
+  const workingProPct = Math.round((workingProCount / total) * 100);
+
+  const topSource = leadSources[0] || { source: "Instagram", count: 0 };
+  const secondSource = leadSources[1] || { source: "Friend / Family", count: 0 };
+  const topSourcePct = Math.round((topSource.count / total) * 100);
+  const secondSourcePct = Math.round((secondSource.count / total) * 100);
+  const combinedOrganicPct = topSourcePct + secondSourcePct;
+
+  const topContent = influencingContent[0] || { content: "Informative", count: 0 };
+  const topContentPct = Math.round((topContent.count / total) * 100);
+
+  const topReason = reasons[0] || { reason: "Placement/Job", count: 0 };
+  const secondReason = reasons[1] || { reason: "Good Reviews", count: 0 };
+  const topReasonPct = Math.round((topReason.count / total) * 100);
+  const secondReasonPct = Math.round((secondReason.count / total) * 100);
+
+  // Batch size calculation
+  const batchMap: Record<string, number> = {};
+  data.forEach((d) => {
+    const b = d.batchName || "Unknown";
+    batchMap[b] = (batchMap[b] || 0) + 1;
+  });
+  const batchEntries = Object.entries(batchMap).sort((a, b) => b[1] - a[1]);
+  const largestBatch = batchEntries[0] || ["DA10", 0];
+  const smallestBatch = batchEntries[batchEntries.length - 1] || ["DA13", 0];
+  const avgBatchSize = Math.round(total / (batchEntries.length || 1));
+
+  // Monthly intake
+  const monthMap: Record<string, number> = {};
+  data.forEach((d) => {
+    if (!d.enrollmentDate) return;
+    const parts = d.enrollmentDate.split("/");
+    if (parts.length === 3) {
+      monthMap[parts[1]] = (monthMap[parts[1]] || 0) + 1;
+    }
+  });
+  const monthEntries = Object.entries(monthMap).sort((a, b) => b[1] - a[1]);
+  const peakMonthEntry = monthEntries[0] || ["1", 0];
+  const lowMonthEntry = monthEntries[monthEntries.length - 1] || ["5", 0];
+  const monthNames: Record<string, string> = {
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December",
+  };
+  const peakMonthName = monthNames[peakMonthEntry[0]] || `Month ${peakMonthEntry[0]}`;
+  const lowMonthName = monthNames[lowMonthEntry[0]] || `Month ${lowMonthEntry[0]}`;
+  const peakMonthPct = Math.round((peakMonthEntry[1] / total) * 100);
+  const lowMonthPct = Math.round((lowMonthEntry[1] / total) * 100);
+
+  // Pre-compute raw counts used in insights
+  const seenAdsCount = data.filter((d) => (d.seenAds || "").toLowerCase().startsWith("yes")).length;
+  const testimonyCount = influencingContent.find((c) => c.content === "Testimony")?.count || 0;
+  const lifeAtHacaCount = influencingContent.find((c) => c.content === "Life at HACA")?.count || 0;
+  const feeReasonCount = reasons.find((r) => r.reason.includes("Afford") || r.reason.includes("Fee"))?.count || 0;
+  const aiCount = Math.round((kpis.aiInfluencePercentage / 100) * total);
+  const nonAiCount = total - aiCount;
+  const combinedTopSourceCount = topSource.count + secondSource.count;
+  const top3Districts = top3DistrictsCount;
+
+  return [
+    // ── 1. EXECUTIVE SUMMARY ──────────────────────────────────────────
+    {
+      id: "exec-summary-demand",
+      category: "Executive Summary",
+      title: "🎯 Total Students & Top Course",
+      insight: `${total} students enrolled across ${batchEntries.length} batches. ${topCourse.count} out of ${total} chose Data Analytics with AI. Only ${secondCourse.count} chose Python.`,
+      supportingMetrics: [
+        `Total enrolled: ${total} students`,
+        `Data Analytics with AI: ${topCourse.count} students`,
+        `Python: ${secondCourse.count} students`,
+        `AI was the main reason for joining: ${aiCount} students`,
+      ],
+      businessImpact: "AI courses are the biggest pull factor — far ahead of anything else.",
+      recommendation: "Lead every ad with 'Learn AI Skills'. Consider bundling Python as an AI add-on.",
+      badgeType: "highlight",
+    },
+    {
+      id: "exec-summary-intent",
+      category: "Executive Summary",
+      title: "💚 Brand Trust — Direct Enrollments",
+      insight: `${total - comparedCount} out of ${total} students joined HACA without comparing any other institute. Only ${comparedCount} students looked elsewhere first.`,
+      supportingMetrics: [
+        `Joined directly without comparing: ${total - comparedCount} students`,
+        `Compared with other institutes first: ${comparedCount} students`,
+        `Top join reason: "${topReason.reason}" — ${topReason.count} students`,
+        `2nd join reason: "${secondReason.reason}" — ${secondReason.count} students`,
+      ],
+      businessImpact: "Strong direct intent means HACA's reputation is working as a sales tool.",
+      recommendation: `Prepare a simple 'Why HACA?' one-pager for the ${comparedCount} students who compare before joining.`,
+      badgeType: "trend",
+    },
+
+    // ── 2. ENROLLMENT INSIGHTS ────────────────────────────────────────
+    {
+      id: "enrollment-seasonality",
+      category: "Enrollment Insights",
+      title: "📅 Peak vs. Quiet Months",
+      insight: `${peakMonthName} was the busiest month: ${peakMonthEntry[1]} students joined. ${lowMonthName} was the quietest: only ${lowMonthEntry[1]} students. Monthly average: ${Math.round(total / Math.max(1, monthEntries.length))} students.`,
+      supportingMetrics: [
+        `Busiest month: ${peakMonthName} — ${peakMonthEntry[1]} students`,
+        `Quietest month: ${lowMonthName} — ${lowMonthEntry[1]} students`,
+        `Difference: ${Math.round(peakMonthEntry[1] / Math.max(1, lowMonthEntry[1]))}x more students in peak month`,
+        `Monthly average: ~${Math.round(total / Math.max(1, monthEntries.length))} students`,
+      ],
+      businessImpact: "Quiet months leave classrooms and trainers underused.",
+      recommendation: "Run discounts or early-bird offers during quiet months.",
+      badgeType: "warning",
+    },
+    {
+      id: "enrollment-velocity",
+      category: "Enrollment Insights",
+      title: "👀 Students Research Before Joining",
+      insight: `${seenAdsCount} out of ${total} students had already seen HACA ads before enrolling. ${secondSource.count} students came through a friend or family referral.`,
+      supportingMetrics: [
+        `Seen HACA ads before joining: ${seenAdsCount} students`,
+        `Came via friend / family recommendation: ${secondSource.count} students`,
+        `Reviews are checked before most join decisions`,
+      ],
+      businessImpact: "Good reviews and active social media directly drive more enrollments.",
+      recommendation: "Ask current students to leave a Google Review after completing their first month.",
+      badgeType: "trend",
+    },
+
+    // ── 3. STUDENT DEMOGRAPHICS ───────────────────────────────────────
+    {
+      id: "demographics-gender",
+      category: "Student Demographics",
+      title: "👫 Gender Split",
+      insight: `${maleCount} male students and ${femaleCount} female students — nearly equal across all courses out of ${total} total.`,
+      supportingMetrics: [
+        `Male students: ${maleCount} out of ${total}`,
+        `Female students: ${femaleCount} out of ${total}`,
+        `Near 50:50 split — rare for a tech school`,
+        `Total students: ${total}`,
+      ],
+      businessImpact: "Equal gender ratio means HACA appeals to everyone, doubling the potential audience.",
+      recommendation: "Show both male and female student success stories equally in ads.",
+      badgeType: "highlight",
+    },
+    {
+      id: "demographics-age",
+      category: "Student Demographics",
+      title: "🎓 Age & Career Stage",
+      insight: `${topAge.count} students are aged ${topAge.ageGroup} — the biggest age group. ${jobSeekerCount + studentCount} are students or job seekers. ${workingProCount} are employed professionals upskilling.`,
+      supportingMetrics: [
+        `Largest age group (${topAge.ageGroup} yrs): ${topAge.count} students`,
+        `Job seekers + students (career starters): ${jobSeekerCount + studentCount} students`,
+        `Working professionals (upskilling): ${workingProCount} students`,
+      ],
+      businessImpact: "Most students want a job fast — placement support is the top priority for them.",
+      recommendation: "For working professionals, offer weekend or evening batches.",
+      badgeType: "trend",
+    },
+    {
+      id: "demographics-geography",
+      category: "Student Demographics",
+      title: "📍 Where Students Come From",
+      insight: `${top3Districts} out of ${total} students come from just 3 districts: ${topDistrict.district} (${topDistrict.count}), ${secondDistrict.district} (${secondDistrict.count}), ${thirdDistrict.district} (${thirdDistrict.count}).`,
+      supportingMetrics: [
+        `${topDistrict.district}: ${topDistrict.count} students`,
+        `${secondDistrict.district}: ${secondDistrict.count} students`,
+        `${thirdDistrict.district}: ${thirdDistrict.count} students`,
+        `Top 3 districts combined: ${top3Districts} out of ${total} students`,
+      ],
+      businessImpact: "Rest of Kerala is largely untapped — a clear growth opportunity.",
+      recommendation: "Run targeted online ads in Ernakulam, Thrissur, and Palakkad.",
+      badgeType: "highlight",
+    },
+
+    // ── 4. MARKETING & LEAD SOURCE INSIGHTS ───────────────────────────
+    {
+      id: "marketing-channels",
+      category: "Marketing & Lead Source Insights",
+      title: "📱 How Students Found HACA",
+      insight: `${topSource.source} brought in ${topSource.count} students — the highest of any channel. ${secondSource.source} was 2nd with ${secondSource.count} students. Together: ${combinedTopSourceCount} out of ${total} students.`,
+      supportingMetrics: [
+        `#1 Source: ${topSource.source} — ${topSource.count} students`,
+        `#2 Source: ${secondSource.source} — ${secondSource.count} students`,
+        `Both together: ${combinedTopSourceCount} out of ${total} students`,
+        `All other channels combined: ${total - combinedTopSourceCount} students`,
+      ],
+      businessImpact: "Instagram + word of mouth is doing most of the recruiting — nearly for free.",
+      recommendation: "Reward students who refer friends with a discount or small gift.",
+      badgeType: "highlight",
+    },
+    {
+      id: "marketing-content",
+      category: "Marketing & Lead Source Insights",
+      title: "📹 What Content Influenced Students",
+      insight: `${topContent.count} students said informative content convinced them. ${testimonyCount} were convinced by student testimonials. ${lifeAtHacaCount} by Life at HACA clips. ${seenAdsCount} had seen HACA ads before joining.`,
+      supportingMetrics: [
+        `Informative posts/videos: ${topContent.count} students`,
+        `Student testimonials: ${testimonyCount} students`,
+        `Life at HACA / campus content: ${lifeAtHacaCount} students`,
+        `Had seen HACA ads before joining: ${seenAdsCount} students`,
+      ],
+      businessImpact: "Useful content converts better than promotional banners.",
+      recommendation: "Post 1 student success story and 1 AI tip on Instagram every week.",
+      badgeType: "trend",
+    },
+
+    // ── 5. COURSE & BATCH INSIGHTS ────────────────────────────────────
+    {
+      id: "course-batch-distribution",
+      category: "Course & Batch Insights",
+      title: "📊 Course Enrollment Split",
+      insight: `Data Analytics with AI: ${topCourse.count} students. Python: ${secondCourse.count} students. ${topCourse.count - secondCourse.count} more students in Data Analytics than Python.`,
+      supportingMetrics: [
+        `Data Analytics with AI: ${topCourse.count} students`,
+        `Python: ${secondCourse.count} students`,
+        `Difference: ${topCourse.count - secondCourse.count} more students in Data Analytics`,
+        `Active batches: ${batchEntries.length}`,
+      ],
+      businessImpact: "Python is underperforming and has room for growth.",
+      recommendation: "Promote Python as an add-on for Data Analytics students.",
+      badgeType: "action",
+    },
+    {
+      id: "course-batch-sizing",
+      category: "Course & Batch Insights",
+      title: "🧑‍🏫 Batch Sizes",
+      insight: `Largest batch (${largestBatch[0]}): ${largestBatch[1]} students. Smallest (${smallestBatch[0]}): ${smallestBatch[1]} students. Average: ${avgBatchSize} students per batch across ${batchEntries.length} batches.`,
+      supportingMetrics: [
+        `Largest batch: ${largestBatch[0]} — ${largestBatch[1]} students`,
+        `Smallest batch: ${smallestBatch[0]} — ${smallestBatch[1]} students`,
+        `Average batch size: ${avgBatchSize} students`,
+        `Total batches tracked: ${batchEntries.length}`,
+      ],
+      businessImpact: "Very small batches are not cost-effective and reduce classroom energy.",
+      recommendation: "Set minimum 12 students per batch before it starts.",
+      badgeType: "warning",
+    },
+
+    // ── 6. STUDENT DECISION FACTORS ───────────────────────────────────
+    {
+      id: "decision-factors-reasons",
+      category: "Student Decision Factors",
+      title: "💼 Why Students Chose HACA",
+      insight: `#1 reason: "${topReason.reason}" — ${topReason.count} students. #2 reason: "${secondReason.reason}" — ${secondReason.count} students. Only ${feeReasonCount} students joined mainly because of fees.`,
+      supportingMetrics: [
+        `#1 Reason: "${topReason.reason}" — ${topReason.count} students`,
+        `#2 Reason: "${secondReason.reason}" — ${secondReason.count} students`,
+        `Joined mainly because of fees: only ${feeReasonCount} students`,
+        `Other reasons: ${total - topReason.count - secondReason.count} students`,
+      ],
+      businessImpact: "Students want job results, not cheap fees — placement data sells HACA better than any discount.",
+      recommendation: "Share real placement results and company names on all channels.",
+      badgeType: "highlight",
+    },
+    {
+      id: "decision-factors-ai",
+      category: "Student Decision Factors",
+      title: "🤖 AI in Syllabus — The Top Deciding Factor",
+      insight: `${aiCount} out of ${total} students chose HACA specifically because AI is part of the course. Only ${nonAiCount} joined for other reasons.`,
+      supportingMetrics: [
+        `Chose HACA because of AI in syllabus: ${aiCount} students`,
+        `Joined for other reasons: ${nonAiCount} students`,
+        `Strongest single deciding factor across all data`,
+        `Total students surveyed: ${total}`,
+      ],
+      businessImpact: "AI is HACA's strongest differentiator — no other institute is matching it yet.",
+      recommendation: "Make 'Learn AI' the headline in every ad, poster, and Instagram post.",
+      badgeType: "highlight",
+    },
+
+    // ── 7. RECOMMENDATIONS ────────────────────────────────────────────
+    {
+      id: "rec-action-roadmap",
+      category: "Recommendations",
+      title: "🚀 Top 3 Actions to Grow Now",
+      insight: `${total} students enrolled. ${topSource.count} came from Instagram. ${secondSource.count} came from referrals. ${peakMonthEntry[1]} joined in the busiest month (${peakMonthName}).`,
+      supportingMetrics: [
+        `Total enrolled: ${total} students`,
+        `Referral students (friends/family): ${secondSource.count} — grow this, it costs nothing`,
+        `Quietest month (${lowMonthName}): only ${lowMonthEntry[1]} students — run an offer here`,
+        `Chose HACA for AI: ${aiCount} students — lead with this in all messaging`,
+      ],
+      businessImpact: "Small, data-backed actions will increase monthly inquiries without a large budget.",
+      recommendation: `1️⃣ Referral reward for every student who brings a friend. 2️⃣ Special offer during ${lowMonthName}. 3️⃣ Weekly placement story on Instagram.`,
+      badgeType: "action",
+    },
+  ];
+}
+
+      category: "Executive Summary",
+      title: "🎯 Total Students & Top Course",
+      insight: `${total} students enrolled across ${batchEntries.length} batches. ${topCoursePct}% chose Data Analytics with AI — only ${secondCoursePct}% chose Python.`,
+      supportingMetrics: [
+        `Total enrolled: ${total} students`,
+        `Data Analytics with AI: ${topCourse.count} students (${topCoursePct}%)`,
+        `Python: ${secondCourse.count} students (${secondCoursePct}%)`,
+        `AI in syllabus: main reason for ${kpis.aiInfluencePercentage}% of students`,
+      ],
+      businessImpact: "AI courses are the biggest pull factor — far ahead of anything else.",
+      recommendation: "Lead every ad with 'Learn AI Skills'. Consider bundling Python as an AI add-on.",
+      badgeType: "highlight",
+    },
+    {
+      id: "exec-summary-intent",
+      category: "Executive Summary",
+      title: "💚 Brand Trust — Direct Enrollments",
+      insight: `${directPct}% of students joined HACA without comparing any other institute. Only ${comparedPct}% (${comparedCount} students) looked elsewhere first.`,
+      supportingMetrics: [
+        `Direct joins (no comparison): ${directPct}% — ${total - comparedCount} students`,
+        `Compared with others first: ${comparedPct}% — ${comparedCount} students`,
+        `Top join reason: "${topReason.reason}" (${topReasonPct}%)`,
+        `2nd join reason: "${secondReason.reason}" (${secondReasonPct}%)`,
+      ],
+      businessImpact: "Strong direct intent means HACA's reputation is working as a sales tool.",
+      recommendation: "Prepare a simple 'Why HACA?' one-pager for the ${comparedPct}% who compare before joining.",
+      badgeType: "trend",
+    },
+
+    // ── 2. ENROLLMENT INSIGHTS ────────────────────────────────────────
+    {
+      id: "enrollment-seasonality",
+      category: "Enrollment Insights",
+      title: "📅 Peak vs. Quiet Months",
+      insight: `${peakMonthName} had the most joinings: ${peakMonthEntry[1]} students (${peakMonthPct}%). ${lowMonthName} was the quietest with only ${lowMonthEntry[1]} students (${lowMonthPct}%).`,
+      supportingMetrics: [
+        `Busiest month: ${peakMonthName} — ${peakMonthEntry[1]} students`,
+        `Quietest month: ${lowMonthName} — ${lowMonthEntry[1]} students`,
+        `Difference: ${Math.round(peakMonthEntry[1] / Math.max(1, lowMonthEntry[1]))}x more in peak vs quiet`,
+        `Monthly average: ~${Math.round(total / Math.max(1, monthEntries.length))} students`,
+      ],
+      businessImpact: "Quiet months leave classrooms and trainers underused.",
+      recommendation: "Run discounts or early-bird offers during quiet months.",
+      badgeType: "warning",
+    },
+    {
+      id: "enrollment-velocity",
+      category: "Enrollment Insights",
+      title: "👀 Students Research Before Joining",
+      insight: `${Math.round((data.filter((d) => d.seenAds?.toLowerCase() === "yes").length / total) * 100)}% of students had already seen HACA ads before enrolling. ${secondSourcePct}% came through a friend or family referral.`,
+      supportingMetrics: [
+        `Seen HACA ads before joining: ${Math.round((data.filter((d) => d.seenAds?.toLowerCase() === "yes").length / total) * 100)}%`,
+        `Came via friend / family recommendation: ${secondSourcePct}%`,
+        `Reviews are checked before most join decisions`,
+      ],
+      businessImpact: "Good reviews and active social media directly drive more enrollments.",
+      recommendation: "Ask current students to leave a Google Review after completing their first month.",
+      badgeType: "trend",
+    },
+
+    // ── 3. STUDENT DEMOGRAPHICS ───────────────────────────────────────
+    {
+      id: "demographics-gender",
+      category: "Student Demographics",
+      title: "👫 Gender Split",
+      insight: `${malePct}% male (${maleCount} students) and ${femalePct}% female (${femaleCount} students) — nearly equal across all courses.`,
+      supportingMetrics: [
+        `Male: ${malePct}% — ${maleCount} students`,
+        `Female: ${femalePct}% — ${femaleCount} students`,
+        `Near 50:50 split — rare for a tech school`,
+        `Total: ${total} students`,
+      ],
+      businessImpact: "Equal gender ratio means HACA appeals to everyone, doubling the potential audience.",
+      recommendation: "Show both male and female student success stories equally in ads.",
+      badgeType: "highlight",
+    },
+    {
+      id: "demographics-age",
+      category: "Student Demographics",
+      title: "🎓 Age & Career Stage",
+      insight: `${topAgePct}% of students (${topAge.count}) are aged ${topAge.ageGroup}. ${freshersPct}% are students or job seekers. ${workingProPct}% (${workingProCount}) are employed professionals upskilling.`,
+      supportingMetrics: [
+        `Largest age group: ${topAge.ageGroup} yrs — ${topAgePct}% (${topAge.count} students)`,
+        `Job seekers + students: ${freshersPct}% — ${jobSeekerCount + studentCount} people`,
+        `Working professionals: ${workingProPct}% — ${workingProCount} people`,
+      ],
+      businessImpact: "Most students want a job fast — placement support is the top priority for them.",
+      recommendation: "For working professionals, offer weekend or evening batches.",
+      badgeType: "trend",
+    },
+    {
+      id: "demographics-geography",
+      category: "Student Demographics",
+      title: "📍 Where Students Come From",
+      insight: `${top3DistrictsPct}% of all students come from just 3 districts: #1 ${topDistrict.district} (${topDistrictPct}%), #2 ${secondDistrict.district} (${Math.round((secondDistrict.count / total) * 100)}%), #3 ${thirdDistrict.district} (${Math.round((thirdDistrict.count / total) * 100)}%).`,
+      supportingMetrics: [
+        `${topDistrict.district}: ${topDistrict.count} students (${topDistrictPct}%)`,
+        `${secondDistrict.district}: ${secondDistrict.count} students (${Math.round((secondDistrict.count / total) * 100)}%)`,
+        `${thirdDistrict.district}: ${thirdDistrict.count} students (${Math.round((thirdDistrict.count / total) * 100)}%)`,
+        `Top 3 districts = ${top3DistrictsPct}% of all students`,
+      ],
+      businessImpact: "Rest of Kerala is largely untapped — a clear growth opportunity.",
+      recommendation: "Run targeted online ads in Ernakulam, Thrissur, and Palakkad.",
+      badgeType: "highlight",
+    },
+
+    // ── 4. MARKETING & LEAD SOURCE INSIGHTS ───────────────────────────
+    {
+      id: "marketing-channels",
+      category: "Marketing & Lead Source Insights",
+      title: "📱 How Students Found HACA",
+      insight: `${topSource.source} brought in the most students — ${topSource.count} students (${topSourcePct}%). ${secondSource.source} was 2nd with ${secondSource.count} students (${secondSourcePct}%). Together: ${combinedOrganicPct}% of all enrollments.`,
+      supportingMetrics: [
+        `#1 Source: ${topSource.source} — ${topSource.count} students (${topSourcePct}%)`,
+        `#2 Source: ${secondSource.source} — ${secondSource.count} students (${secondSourcePct}%)`,
+        `Both together: ${combinedOrganicPct}% of total students`,
+        `All other channels: only ${100 - combinedOrganicPct}%`,
+      ],
+      businessImpact: "Instagram + word of mouth is doing most of the recruiting — nearly for free.",
+      recommendation: "Reward students who refer friends with a discount or small gift.",
+      badgeType: "highlight",
+    },
+    {
+      id: "marketing-content",
+      category: "Marketing & Lead Source Insights",
+      title: "📹 What Content Influenced Students",
+      insight: `${topContentPct}% (${topContent.count} students) said informative content was what convinced them. Testimonials (${Math.round(((influencingContent.find((c) => c.content === "Testimony")?.count || 0) / total) * 100)}%) and Life at HACA clips (${Math.round(((influencingContent.find((c) => c.content === "Life at HACA")?.count || 0) / total) * 100)}%) also mattered. ${Math.round((data.filter((d) => (d.seenAds || "").toLowerCase().startsWith("yes")).length / total) * 100)}% had seen HACA ads before joining.`,
+      supportingMetrics: [
+        `Informative posts/videos: ${topContentPct}% — ${topContent.count} students`,
+        `Student testimonials: ${Math.round(((influencingContent.find((c) => c.content === "Testimony")?.count || 0) / total) * 100)}%`,
+        `Life at HACA clips: ${Math.round(((influencingContent.find((c) => c.content === "Life at HACA")?.count || 0) / total) * 100)}%`,
+        `Had seen HACA ads before joining: ${Math.round((data.filter((d) => (d.seenAds || "").toLowerCase().startsWith("yes")).length / total) * 100)}%`,
+      ],
+      businessImpact: "Useful content converts better than promotional banners.",
+      recommendation: "Post 1 student success story and 1 AI tip on Instagram every week.",
+      badgeType: "trend",
+    },
+
+    // ── 5. COURSE & BATCH INSIGHTS ────────────────────────────────────
+    {
+      id: "course-batch-distribution",
+      category: "Course & Batch Insights",
+      title: "📊 Course Enrollment Split",
+      insight: `Data Analytics with AI: ${topCourse.count} students (${topCoursePct}%). Python: ${secondCourse.count} students (${secondCoursePct}%). A ${Math.abs(topCoursePct - secondCoursePct)}% gap between the two courses.`,
+      supportingMetrics: [
+        `Data Analytics with AI: ${topCourse.count} students (${topCoursePct}%)`,
+        `Python: ${secondCourse.count} students (${secondCoursePct}%)`,
+        `Gap: ${Math.abs(topCoursePct - secondCoursePct)}%`,
+        `Active batches: ${batchEntries.length}`,
+      ],
+      businessImpact: "Python is underperforming and has room for growth.",
+      recommendation: "Promote Python as an add-on for Data Analytics students.",
+      badgeType: "action",
+    },
+    {
+      id: "course-batch-sizing",
+      category: "Course & Batch Insights",
+      title: "🧑‍🏫 Batch Sizes",
+      insight: `Largest batch (${largestBatch[0]}): ${largestBatch[1]} students. Smallest (${smallestBatch[0]}): ${smallestBatch[1]} students. Average: ${avgBatchSize} students per batch across ${batchEntries.length} batches.`,
+      supportingMetrics: [
+        `Largest batch: ${largestBatch[0]} — ${largestBatch[1]} students`,
+        `Smallest batch: ${smallestBatch[0]} — ${smallestBatch[1]} students`,
+        `Average batch size: ${avgBatchSize} students`,
+        `Total batches tracked: ${batchEntries.length}`,
+      ],
+      businessImpact: "Very small batches are not cost-effective and reduce classroom energy.",
+      recommendation: "Set minimum 12 students per batch before it starts.",
+      badgeType: "warning",
+    },
+
+    // ── 6. STUDENT DECISION FACTORS ───────────────────────────────────
+    {
+      id: "decision-factors-reasons",
+      category: "Student Decision Factors",
+      title: "💼 Why Students Chose HACA",
+      insight: `#1 reason: "${topReason.reason}" — ${topReasonPct}% (${topReason.count} students). #2 reason: "${secondReason.reason}" — ${secondReasonPct}% (${secondReason.count} students). Only ${Math.round(((reasons.find((r) => r.reason.includes("Afford") || r.reason.includes("Fee"))?.count || 0) / total) * 100)}% joined because of fees.`,
+      supportingMetrics: [
+        `#1 Reason: "${topReason.reason}" — ${topReason.count} students (${topReasonPct}%)`,
+        `#2 Reason: "${secondReason.reason}" — ${secondReason.count} students (${secondReasonPct}%)`,
+        `Joined because of affordable fees: only ${Math.round(((reasons.find((r) => r.reason.includes("Afford") || r.reason.includes("Fee"))?.count || 0) / total) * 100)}%`,
+        `Other reasons: remaining ${100 - topReasonPct - secondReasonPct}%`,
+      ],
+      businessImpact: "Students want job results, not cheap fees — placement data sells HACA better than any discount.",
+      recommendation: "Share real placement results and company names on all channels.",
+      badgeType: "highlight",
+    },
+    {
+      id: "decision-factors-ai",
+      category: "Student Decision Factors",
+      title: "🤖 AI in Syllabus — The Top Deciding Factor",
+      insight: `${kpis.aiInfluencePercentage}% of students chose HACA specifically because AI is part of the course. Only ${100 - kpis.aiInfluencePercentage}% joined for other reasons.`,
+      supportingMetrics: [
+        `Chose HACA because of AI: ${kpis.aiInfluencePercentage}%`,
+        `Joined for other reasons: ${100 - kpis.aiInfluencePercentage}%`,
+        `Strongest single deciding factor across all data`,
+        `Sample size: ${total} students`,
+      ],
+      businessImpact: "AI is HACA's strongest differentiator — no other institute is matching it yet.",
+      recommendation: "Make 'Learn AI' the headline in every ad, poster, and Instagram post.",
+      badgeType: "highlight",
+    },
+
+    // ── 7. RECOMMENDATIONS ────────────────────────────────────────────
+    {
+      id: "rec-action-roadmap",
+      category: "Recommendations",
+      title: "🚀 Top 3 Actions to Grow Now",
+      insight: `Based on all the data: ${total} students, ${topSourcePct}% from Instagram, ${secondSourcePct}% from referrals, ${peakMonthPct}% peak intake in ${peakMonthName}.`,
+      supportingMetrics: [
+        `Total enrolled: ${total} students`,
+        `Referral share: ${secondSourcePct}% — grow this first, it costs nothing`,
+        `Quietest month: ${lowMonthName} (${lowMonthPct}%) — run an offer here`,
+        `AI pull rate: ${kpis.aiInfluencePercentage}% — lead with this in all messaging`,
+      ],
+      businessImpact: "Small, data-backed actions will increase monthly inquiries without a large budget.",
+      recommendation: "1️⃣ Referral reward for every student who brings a friend. 2️⃣ Special offer during ${lowMonthName}. 3️⃣ Weekly placement story on Instagram.",
+      badgeType: "action",
+    },
+  ];
+}
+

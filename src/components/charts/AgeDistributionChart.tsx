@@ -16,6 +16,7 @@ interface AgeDistributionChartProps {
   data: AgeDistribution[];
   activeFilter?: string;
   onSelect?: (value: string) => void;
+  title?: string;
 }
 
 const CustomTooltip = ({
@@ -32,7 +33,7 @@ const CustomTooltip = ({
       <p className="text-sm font-semibold text-text-primary">{d.ageGroup}</p>
       <div className="mt-1">
         <p className="text-xs text-text-secondary">
-          Students: <span className="font-bold text-accent-primary">{d.count}</span>
+          <span className="font-bold text-accent-cyan">{d.count}</span> students
         </p>
       </div>
     </div>
@@ -43,6 +44,7 @@ export default function AgeDistributionChart({
   data,
   activeFilter,
   onSelect,
+  title,
 }: AgeDistributionChartProps) {
   const handleClick = (item: any) => {
     if (!onSelect) return;
@@ -75,7 +77,7 @@ export default function AgeDistributionChart({
             </svg>
           </div>
           <h3 className="text-sm font-semibold text-text-primary">
-            Age Distribution
+            {title || "Age Distribution"}
           </h3>
         </div>
         <div className="flex h-56 items-center justify-center">
@@ -104,7 +106,7 @@ export default function AgeDistributionChart({
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Age Distribution
+          {title || "Age Distribution"}
         </h3>
       </div>
 

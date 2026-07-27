@@ -127,6 +127,26 @@ export interface Insight {
   change?: number; // percentage
 }
 
+export type InsightCategory =
+  | "Executive Summary"
+  | "Enrollment Insights"
+  | "Student Demographics"
+  | "Marketing & Lead Source Insights"
+  | "Course & Batch Insights"
+  | "Student Decision Factors"
+  | "Recommendations";
+
+export interface ComprehensiveInsight {
+  id: string;
+  category: InsightCategory;
+  title: string;
+  insight: string;
+  supportingMetrics: string[];
+  businessImpact: string;
+  recommendation: string;
+  badgeType?: "highlight" | "trend" | "warning" | "action";
+}
+
 export interface FilterState {
   course: string;
   district: string;

@@ -52,6 +52,68 @@ interface DashboardClientProps {
   data: EnrollmentData[];
 }
 
+const defaultChartOrder = [
+  "course",
+  "gender",
+  "age",
+  "district",
+  "status",
+  "trend",
+  "education",
+  "seenAds",
+  "influencingContent",
+  "aiInfluence",
+  "reason",
+  "leadSource",
+];
+
+const defaultChartTitles: Record<string, string> = {
+  course: "Course Distribution",
+  gender: "Gender Distribution",
+  age: "Age Distribution",
+  district: "District Distribution",
+  status: "Status at Enrollment",
+  trend: "Monthly Enrollment Trend",
+  education: "Education Level",
+  seenAds: "Seen Ads Before Enrolling?",
+  influencingContent: "Most Influencing Content",
+  aiInfluence: "Chose HACA Due to AI Integration?",
+  reason: "Primary Reason for Choosing HACA",
+  leadSource: "Primary Lead Source",
+};
+
+type ChartSize = "col-span-1" | "col-span-2" | "col-span-3";
+
+const defaultChartSizes: Record<string, ChartSize> = {
+  course: "col-span-1",
+  gender: "col-span-1",
+  age: "col-span-1",
+  district: "col-span-1",
+  status: "col-span-1",
+  trend: "col-span-1",
+  education: "col-span-1",
+  seenAds: "col-span-1",
+  influencingContent: "col-span-1",
+  aiInfluence: "col-span-1",
+  reason: "col-span-1",
+  leadSource: "col-span-1",
+};
+
+const defaultChartHeights: Record<string, number> = {
+  course: 360,
+  gender: 360,
+  age: 360,
+  district: 440,
+  status: 440,
+  trend: 440,
+  education: 360,
+  seenAds: 360,
+  influencingContent: 360,
+  aiInfluence: 360,
+  reason: 360,
+  leadSource: 360,
+};
+
 export default function DashboardClient({ data }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [filters, setFilters] = useState<FilterState>({
@@ -90,6 +152,298 @@ export default function DashboardClient({ data }: DashboardClientProps) {
   const months = useMemo(() => getUniqueMonths(data), [data]);
   const batches = useMemo(() => getUniqueBatches(data), [data]);
   const years = useMemo(() => getUniqueYears(data), [data]);
+
+  // Drag & drop layout reordering, size customization, and title editing state
+  const [chartOrder, setChartOrder] = useState<string[]>(defaultChartOrder);
+  const [chartTitles, setChartTitles] = useState<Record<string, string>>(defaultChartTitles);
+  const [chartSizes, setChartSizes] = useState<Record<string, ChartSize>>(defaultChartSizes);
+  const [chartHeights, setChartHeights] = useState<Record<string, number>>(defaultChartHeights);
+  const [editingChartId, setEditingChartId] = useState<string | null>(null);
+  const [editTitleValue, setEditTitleValue] = useState("");
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizingChartId, setResizingChartId] = useState<string | null>(null);
+
+  const startEditingTitle = (chartId: string) => {
+    setEditingChartId(chartId);
+    setEditTitleValue(chartTitles[chartId] || defaultChartTitles[chartId]);
+  };
+
+  const saveEditingTitle = () => {
+    if (editingChartId && editTitleValue.trim()) {
+      setChartTitles((prev) => ({
+        ...prev,
+        [editingChartId]: editTitleValue.trim(),
+      }));
+    }
+    setEditingChartId(null);
+  };
+
+  const handleResizeMouseDown = (e: React.MouseEvent, chartId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizingChartId(chartId);
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const currentSize = chartSizes[chartId] || "col-span-1";
+    const startSpan =
+      currentSize === "col-span-3" ? 3 : currentSize === "col-span-2" ? 2 : 1;
+    const startHeight =
+      chartHeights[chartId] || defaultChartHeights[chartId] || 360;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+
+      const spanDelta = Math.round(deltaX / 130);
+      const newSpan = Math.max(1, Math.min(3, startSpan + spanDelta));
+      const newSize: ChartSize =
+        newSpan === 3
+          ? "col-span-3"
+          : newSpan === 2
+          ? "col-span-2"
+          : "col-span-1";
+      const newHeight = Math.max(260, Math.min(850, startHeight + deltaY));
+
+      setChartSizes((prev) => {
+        if (prev[chartId] === newSize) return prev;
+        return { ...prev, [chartId]: newSize };
+      });
+      setChartHeights((prev) => {
+        if (Math.abs((prev[chartId] || startHeight) - newHeight) < 2)
+          return prev;
+        return { ...prev, [chartId]: newHeight };
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      setResizingChartId(null);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleResizeTouchStart = (e: React.TouchEvent, chartId: string) => {
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizingChartId(chartId);
+    const startX = e.touches[0].clientX;
+    const startY = e.touches[0].clientY;
+    const currentSize = chartSizes[chartId] || "col-span-1";
+    const startSpan =
+      currentSize === "col-span-3" ? 3 : currentSize === "col-span-2" ? 2 : 1;
+    const startHeight =
+      chartHeights[chartId] || defaultChartHeights[chartId] || 360;
+
+    const handleTouchMove = (moveEvent: TouchEvent) => {
+      const deltaX = moveEvent.touches[0].clientX - startX;
+      const deltaY = moveEvent.touches[0].clientY - startY;
+
+      const spanDelta = Math.round(deltaX / 110);
+      const newSpan = Math.max(1, Math.min(3, startSpan + spanDelta));
+      const newSize: ChartSize =
+        newSpan === 3
+          ? "col-span-3"
+          : newSpan === 2
+          ? "col-span-2"
+          : "col-span-1";
+      const newHeight = Math.max(260, Math.min(850, startHeight + deltaY));
+
+      setChartSizes((prev) => {
+        if (prev[chartId] === newSize) return prev;
+        return { ...prev, [chartId]: newSize };
+      });
+      setChartHeights((prev) => {
+        if (Math.abs((prev[chartId] || startHeight) - newHeight) < 2)
+          return prev;
+        return { ...prev, [chartId]: newHeight };
+      });
+    };
+
+    const handleTouchEnd = () => {
+      setIsResizing(false);
+      setResizingChartId(null);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+
+    window.addEventListener("touchmove", handleTouchMove);
+    window.addEventListener("touchend", handleTouchEnd);
+  };
+
+  const getColSpanClass = (size?: ChartSize) => {
+    switch (size) {
+      case "col-span-2":
+        return "lg:col-span-2";
+      case "col-span-3":
+        return "lg:col-span-3";
+      default:
+        return "lg:col-span-1";
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, idx: number) => {
+    setDraggedIdx(idx);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverIdx !== idx) {
+      setDragOverIdx(idx);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIdx: number) => {
+    e.preventDefault();
+    if (draggedIdx === null || draggedIdx === targetIdx) {
+      setDraggedIdx(null);
+      setDragOverIdx(null);
+      return;
+    }
+    const newOrder = [...chartOrder];
+    const [movedItem] = newOrder.splice(draggedIdx, 1);
+    newOrder.splice(targetIdx, 0, movedItem);
+    setChartOrder(newOrder);
+    setDraggedIdx(null);
+    setDragOverIdx(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIdx(null);
+    setDragOverIdx(null);
+  };
+
+  const renderChartComponent = (chartId: string) => {
+    const title = chartTitles[chartId] || defaultChartTitles[chartId];
+    switch (chartId) {
+      case "course":
+        return (
+          <CourseDistributionChart
+            data={courseDist}
+            activeFilter={filters.course}
+            onSelect={(val) => setFilters((prev) => ({ ...prev, course: val }))}
+            title={title}
+          />
+        );
+      case "gender":
+        return (
+          <GenderDistributionChart
+            data={genderDist}
+            activeFilter={filters.gender}
+            onSelect={(val) => setFilters((prev) => ({ ...prev, gender: val }))}
+            title={title}
+          />
+        );
+      case "age":
+        return (
+          <AgeDistributionChart
+            data={ageDist}
+            activeFilter={filters.ageGroup}
+            onSelect={(val) => setFilters((prev) => ({ ...prev, ageGroup: val }))}
+            title={title}
+          />
+        );
+      case "district":
+        return (
+          <DistrictDistributionChart
+            data={districtDist}
+            activeFilter={filters.district}
+            onSelect={(val) => setFilters((prev) => ({ ...prev, district: val }))}
+            title={title}
+          />
+        );
+      case "status":
+        return (
+          <StatusDistributionChart
+            data={statusDist}
+            activeFilter={filters.currentStatus}
+            onSelect={(val) =>
+              setFilters((prev) => ({ ...prev, currentStatus: val }))
+            }
+            title={title}
+          />
+        );
+      case "trend":
+        return <TrendChart data={trends} title={title} />;
+      case "education":
+        return (
+          <EducationDistributionChart
+            data={educationDist}
+            activeFilter={filters.educationalBackground}
+            onSelect={(val) =>
+              setFilters((prev) => ({ ...prev, educationalBackground: val }))
+            }
+            title={title}
+          />
+        );
+      case "seenAds":
+        return (
+          <SeenAdsChart
+            data={seenAds}
+            activeFilter={filters.seenAds}
+            onSelect={(val) => setFilters((prev) => ({ ...prev, seenAds: val }))}
+            title={title}
+          />
+        );
+      case "influencingContent":
+        return (
+          <InfluencingContentChart
+            data={influencingContent}
+            activeFilter={filters.influencingContent}
+            onSelect={(val) =>
+              setFilters((prev) => ({ ...prev, influencingContent: val }))
+            }
+            title={title}
+          />
+        );
+      case "aiInfluence":
+        return (
+          <AIInfluenceChart
+            data={aiInfluence}
+            activeFilter={filters.choseDueToAI}
+            onSelect={(val) =>
+              setFilters((prev) => ({ ...prev, choseDueToAI: val }))
+            }
+            title={title}
+          />
+        );
+      case "reason":
+        return (
+          <ReasonForChoosingChart
+            data={reasonForChoosingDist}
+            activeFilter={filters.reasonForChoosingInstitute}
+            onSelect={(val) =>
+              setFilters((prev) => ({
+                ...prev,
+                reasonForChoosingInstitute: val,
+              }))
+            }
+            title={title}
+          />
+        );
+      case "leadSource":
+        return (
+          <LeadSourceChart
+            data={leadSources}
+            activeFilter={filters.leadSource}
+            onSelect={(val) =>
+              setFilters((prev) => ({ ...prev, leadSource: val }))
+            }
+            title={title}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="flex flex-1 flex-col gap-6 pb-12">
@@ -171,108 +525,233 @@ export default function DashboardClient({ data }: DashboardClientProps) {
               years={years}
             />
 
-            {/* Charts Row 1 */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <CourseDistributionChart
-                data={courseDist}
-                activeFilter={filters.course}
-                onSelect={(val) =>
-                  setFilters((prev) => ({ ...prev, course: val }))
-                }
-              />
-              <GenderDistributionChart
-                data={genderDist}
-                activeFilter={filters.gender}
-                onSelect={(val) =>
-                  setFilters((prev) => ({ ...prev, gender: val }))
-                }
-              />
-              <AgeDistributionChart
-                data={ageDist}
-                activeFilter={filters.ageGroup}
-                onSelect={(val) =>
-                  setFilters((prev) => ({ ...prev, ageGroup: val }))
-                }
-              />
+            {/* Customization Controls Banner */}
+            <div className="flex flex-col gap-3 rounded-xl border border-border/80 bg-surface-elevated/60 p-4 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between fade-in-up">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-primary/15 text-accent-primary">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-text-primary">
+                    Interactive Chart Customizer
+                  </h4>
+                  <p className="text-xs text-text-muted">
+                    Drag & drop charts using{" "}
+                    <span className="font-semibold text-text-primary">⋮⋮</span>{" "}
+                    to reorder (#1 to #12) • Drag bottom-right corner handle{" "}
+                    <span className="font-semibold text-accent-cyan">↘</span>{" "}
+                    in any direction to custom resize width &amp; height and align cards • Click{" "}
+                    <span className="font-semibold text-text-primary">✏️</span>{" "}
+                    to customize heading title
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setChartOrder(defaultChartOrder);
+                    setChartTitles(defaultChartTitles);
+                    setChartSizes(defaultChartSizes);
+                    setChartHeights(defaultChartHeights);
+                  }}
+                  className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text-secondary hover:border-accent-primary/50 hover:text-text-primary transition-colors"
+                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                    <path d="M3 3v5h5" />
+                  </svg>
+                  Reset Default Layout
+                </button>
+              </div>
             </div>
 
-            {/* Charts Row 2 */}
+            {/* Draggable, Expandable & Editable Charts Grid */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <DistrictDistributionChart
-                data={districtDist}
-                activeFilter={filters.district}
-                onSelect={(val) =>
-                  setFilters((prev) => ({ ...prev, district: val }))
-                }
-              />
-              <TrendChart data={trends} />
-              <StatusDistributionChart
-                data={statusDist}
-                activeFilter={filters.currentStatus}
-                onSelect={(val) =>
-                  setFilters((prev) => ({ ...prev, currentStatus: val }))
-                }
-              />
+              {chartOrder.map((chartId, idx) => (
+                <div
+                  key={chartId}
+                  style={{
+                    height: `${
+                      chartHeights[chartId] ||
+                      defaultChartHeights[chartId] ||
+                      380
+                    }px`,
+                  }}
+                  draggable={!isResizing}
+                  onDragStart={(e) => handleDragStart(e, idx)}
+                  onDragOver={(e) => handleDragOver(e, idx)}
+                  onDrop={(e) => handleDrop(e, idx)}
+                  onDragEnd={handleDragEnd}
+                  className={`relative group transition-all duration-300 flex flex-col ${getColSpanClass(
+                    chartSizes[chartId]
+                  )} ${
+                    dragOverIdx === idx
+                      ? "scale-[1.02] ring-2 ring-accent-primary shadow-2xl rounded-2xl"
+                      : ""
+                  } ${draggedIdx === idx ? "opacity-40" : ""}`}
+                >
+                  {/* Position Badge, Edit Heading & Drag Handle */}
+                  <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface-elevated/95 px-2.5 py-1 shadow-md backdrop-blur-sm transition-all opacity-85 hover:opacity-100">
+                    <span className="text-[10px] font-bold text-accent-primary bg-accent-primary/10 px-1.5 py-0.5 rounded">
+                      #{idx + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => startEditingTitle(chartId)}
+                      title="Edit Chart Heading"
+                      className="text-text-muted hover:text-accent-primary p-0.5 transition-colors"
+                    >
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </button>
+                    <div
+                      className="cursor-grab active:cursor-grabbing text-text-muted hover:text-text-primary px-1 flex items-center"
+                      title="Drag to reorder chart position"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="9" cy="5" r="1" />
+                        <circle cx="9" cy="12" r="1" />
+                        <circle cx="9" cy="19" r="1" />
+                        <circle cx="15" cy="5" r="1" />
+                        <circle cx="15" cy="12" r="1" />
+                        <circle cx="15" cy="19" r="1" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Drag & Expand Handle at Bottom-Right Corner (2D Width + Height) */}
+                  <div
+                    onMouseDown={(e) => handleResizeMouseDown(e, chartId)}
+                    onTouchStart={(e) => handleResizeTouchStart(e, chartId)}
+                    title="Drag horizontally for width or vertically for height to align cards"
+                    className={`absolute bottom-2.5 right-2.5 z-30 flex h-7 w-7 cursor-nwse-resize items-center justify-center rounded-lg border border-border/80 bg-surface-elevated/95 text-text-muted hover:border-accent-cyan hover:bg-accent-cyan/20 hover:text-accent-cyan shadow-md backdrop-blur-sm transition-all ${
+                      resizingChartId === chartId
+                        ? "border-accent-cyan bg-accent-cyan/25 text-accent-cyan scale-110 ring-2 ring-accent-cyan"
+                        : "opacity-75 hover:opacity-100"
+                    }`}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="15 3 21 3 21 9" />
+                      <polyline points="9 21 3 21 3 15" />
+                      <line x1="21" y1="3" x2="14" y2="10" />
+                      <line x1="3" y1="21" x2="10" y2="14" />
+                    </svg>
+                  </div>
+
+                  {/* Chart Component */}
+                  {renderChartComponent(chartId)}
+                </div>
+              ))}
             </div>
 
-            {/* Charts Row 3 */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <EducationDistributionChart
-                data={educationDist}
-                activeFilter={filters.educationalBackground}
-                onSelect={(val) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    educationalBackground: val,
-                  }))
-                }
-              />
-              <SeenAdsChart
-                data={seenAds}
-                activeFilter={filters.seenAds}
-                onSelect={(val) =>
-                  setFilters((prev) => ({ ...prev, seenAds: val }))
-                }
-              />
-              <InfluencingContentChart
-                data={influencingContent}
-                activeFilter={filters.influencingContent}
-                onSelect={(val) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    influencingContent: val,
-                  }))
-                }
-              />
-            </div>
+            {/* Edit Chart Heading Modal */}
+            {editingChartId && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+                <div className="w-full max-w-md rounded-2xl border border-border bg-surface-elevated p-6 shadow-2xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                      <span className="text-accent-primary">✏️</span>
+                      Edit Chart Heading
+                    </h3>
+                    <button
+                      onClick={() => setEditingChartId(null)}
+                      className="text-text-muted hover:text-text-primary text-xl"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                  <p className="text-xs text-text-muted mb-4">
+                    Customize the display title for position #
+                    {chartOrder.indexOf(editingChartId) + 1} chart.
+                  </p>
+                  
+                  {/* Chart Title Input */}
+                  <div className="mb-6">
+                    <label className="block text-xs font-semibold text-text-secondary mb-1.5">
+                      CHART HEADING TITLE
+                    </label>
+                    <input
+                      type="text"
+                      value={editTitleValue}
+                      onChange={(e) => setEditTitleValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") saveEditingTitle();
+                        if (e.key === "Escape") setEditingChartId(null);
+                      }}
+                      placeholder="Enter chart heading..."
+                      className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-text-primary focus:border-accent-primary focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                      autoFocus
+                    />
+                  </div>
 
-            {/* Charts Row 4 */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <AIInfluenceChart
-                data={aiInfluence}
-                activeFilter={filters.choseDueToAI}
-                onSelect={(val) =>
-                  setFilters((prev) => ({ ...prev, choseDueToAI: val }))
-                }
-              />
-              <ReasonForChoosingChart
-                data={reasonForChoosingDist}
-                activeFilter={filters.reasonForChoosingInstitute}
-                onSelect={(val) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    reasonForChoosingInstitute: val,
-                  }))
-                }
-              />
-              <LeadSourceChart
-                data={leadSources}
-                activeFilter={filters.leadSource}
-                onSelect={(val) =>
-                  setFilters((prev) => ({ ...prev, leadSource: val }))
-                }
-              />
-            </div>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setEditingChartId(null)}
+                      className="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-elevated"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={saveEditingTitle}
+                      className="rounded-xl bg-accent-primary px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-accent-primary/25 hover:bg-accent-primary/90"
+                    >
+                      Save Heading
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Row 7 — Respondent Directory */}
             <div className="grid grid-cols-1 gap-6">

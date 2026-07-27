@@ -113,6 +113,18 @@ body {
   border: 1px solid rgba(123, 92, 250, 0.15);
   border-radius: 16px;
   box-shadow: var(--shadow-md);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.glass-card-static > div:last-child {
+  flex: 1 1 0% !important;
+  height: auto !important;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* ─── Gradient Text ──────────────────────────────────────────────── */
@@ -273,3 +285,44 @@ select {
     #000000 100%
   );
 }
+
+/* ─── Print Styles (for Insights PDF download) ───────────────────── */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  header,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  main {
+    background: #ffffff !important;
+  }
+
+  .bg-mesh {
+    background-image: none !important;
+    background-color: #ffffff !important;
+  }
+
+  .glass-card-static {
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  @page {
+    margin: 20mm;
+    size: A4;
+  }
+}
+

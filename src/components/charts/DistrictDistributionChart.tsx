@@ -16,6 +16,7 @@ interface DistrictDistributionChartProps {
   data: DistrictDistribution[];
   activeFilter?: string;
   onSelect?: (value: string) => void;
+  title?: string;
 }
 
 const CustomTooltip = ({
@@ -30,9 +31,12 @@ const CustomTooltip = ({
   return (
     <div className="rounded-xl border border-border bg-surface-elevated px-4 py-3 shadow-xl">
       <p className="text-sm font-semibold text-text-primary">{d.district}</p>
-      <p className="text-xs text-text-secondary">
-        <span className="font-bold text-accent-emerald">{d.count}</span> students
-      </p>
+      <div className="mt-1">
+        <p className="text-xs text-text-secondary">
+          <span className="font-bold text-accent-emerald">{d.count}</span>{" "}
+          students
+        </p>
+      </div>
     </div>
   );
 };
@@ -41,6 +45,7 @@ export default function DistrictDistributionChart({
   data,
   activeFilter,
   onSelect,
+  title,
 }: DistrictDistributionChartProps) {
   const handleClick = (item: any) => {
     if (!onSelect) return;
@@ -73,7 +78,7 @@ export default function DistrictDistributionChart({
             </svg>
           </div>
           <h3 className="text-sm font-semibold text-text-primary">
-            District Distribution
+            {title || "District Distribution"}
           </h3>
         </div>
         <div className="flex h-56 items-center justify-center">
@@ -102,7 +107,7 @@ export default function DistrictDistributionChart({
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          District Distribution
+          {title || "District Distribution"}
         </h3>
       </div>
 

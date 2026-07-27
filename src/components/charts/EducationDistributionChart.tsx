@@ -16,6 +16,7 @@ interface EducationDistributionChartProps {
   data: EducationDistribution[];
   activeFilter?: string;
   onSelect?: (value: string) => void;
+  title?: string;
 }
 
 const CustomTooltip = ({
@@ -32,7 +33,7 @@ const CustomTooltip = ({
       <p className="text-sm font-semibold text-text-primary">{d.background}</p>
       <div className="mt-1">
         <p className="text-xs text-text-secondary">
-          Students: <span className="font-bold text-accent-primary">{d.count}</span>
+          Students: <span className="font-bold text-accent-pink">{d.count}</span>
         </p>
       </div>
     </div>
@@ -43,6 +44,7 @@ export default function EducationDistributionChart({
   data,
   activeFilter,
   onSelect,
+  title,
 }: EducationDistributionChartProps) {
   const handleClick = (item: any) => {
     if (!onSelect) return;
@@ -75,7 +77,7 @@ export default function EducationDistributionChart({
             </svg>
           </div>
           <h3 className="text-sm font-semibold text-text-primary">
-            Student Educational Background
+            {title || "Education Level"}
           </h3>
         </div>
         <div className="flex h-72 items-center justify-center">
@@ -105,7 +107,7 @@ export default function EducationDistributionChart({
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Student Educational Background
+          {title || "Education Level"}
         </h3>
       </div>
 

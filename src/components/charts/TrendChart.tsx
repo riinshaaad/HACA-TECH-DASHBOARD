@@ -13,6 +13,7 @@ import { TrendPoint } from "@/lib/types";
 
 interface TrendChartProps {
   data: TrendPoint[];
+  title?: string;
 }
 
 const CustomTooltip = ({
@@ -48,7 +49,7 @@ const CustomTooltip = ({
   );
 };
 
-export default function TrendChart({ data }: TrendChartProps) {
+export default function TrendChart({ data, title }: TrendChartProps) {
   return (
     <div className="glass-card-static p-5 fade-in-up-delay-3">
       <div className="mb-4 flex items-center gap-2">
@@ -67,7 +68,7 @@ export default function TrendChart({ data }: TrendChartProps) {
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Enrollment Trends
+          {title || "Monthly Enrollment Trend"}
         </h3>
       </div>
       <div className="h-64">

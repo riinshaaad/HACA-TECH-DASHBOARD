@@ -24,8 +24,8 @@ export default function FilterBar({
   years,
 }: FilterBarProps) {
   return (
-    <div className="fade-in-up glass-card-static p-4" id="filter-bar">
-      <div className="mb-3 flex items-center gap-2">
+    <div className="fade-in-up glass-card-static p-2.5" id="filter-bar">
+      <div className="mb-2 flex items-center gap-2">
         <svg
           width="16"
           height="16"
@@ -39,7 +39,7 @@ export default function FilterBar({
         >
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
         </svg>
-        <span className="text-sm font-semibold text-text-primary">
+        <span className="text-xs font-semibold text-text-primary">
           Filter Data
         </span>
         {Object.values(filters).some((val) => val && val !== "All") && (
@@ -71,12 +71,12 @@ export default function FilterBar({
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6">
         {/* Course Filter */}
         <div>
           <label
             htmlFor="course-filter"
-            className="mb-1.5 block text-xs font-medium text-text-muted"
+            className="mb-1 block text-xs font-medium text-text-muted"
           >
             Course
           </label>
@@ -86,7 +86,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, course: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
+            className="w-full rounded-lg border border-border bg-surface-hover px-2.5 py-1.5 text-xs text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Courses</option>
             {courses.map((c) => (
@@ -101,7 +101,7 @@ export default function FilterBar({
         <div>
           <label
             htmlFor="district-filter"
-            className="mb-1.5 block text-xs font-medium text-text-muted"
+            className="mb-1 block text-xs font-medium text-text-muted"
           >
             District
           </label>
@@ -111,7 +111,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, district: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
+            className="w-full rounded-lg border border-border bg-surface-hover px-2.5 py-1.5 text-xs text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Districts</option>
             {districts.map((d) => (
@@ -126,7 +126,7 @@ export default function FilterBar({
         <div>
           <label
             htmlFor="status-filter"
-            className="mb-1.5 block text-xs font-medium text-text-muted"
+            className="mb-1 block text-xs font-medium text-text-muted"
           >
             Current Status
           </label>
@@ -136,7 +136,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, currentStatus: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
+            className="w-full rounded-lg border border-border bg-surface-hover px-2.5 py-1.5 text-xs text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Statuses</option>
             {statuses.map((s) => (
@@ -150,7 +150,7 @@ export default function FilterBar({
         <div>
           <label
             htmlFor="month-filter"
-            className="mb-1.5 block text-xs font-medium text-text-muted"
+            className="mb-1 block text-xs font-medium text-text-muted"
           >
             Month
           </label>
@@ -160,7 +160,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, month: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
+            className="w-full rounded-lg border border-border bg-surface-hover px-2.5 py-1.5 text-xs text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Months</option>
             {months.map((m) => (
@@ -174,7 +174,7 @@ export default function FilterBar({
         <div>
           <label
             htmlFor="batch-filter"
-            className="mb-1.5 block text-xs font-medium text-text-muted"
+            className="mb-1 block text-xs font-medium text-text-muted"
           >
             Batch
           </label>
@@ -184,7 +184,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, batch: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
+            className="w-full rounded-lg border border-border bg-surface-hover px-2.5 py-1.5 text-xs text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Batches</option>
             {batches.map((b) => (
@@ -198,7 +198,7 @@ export default function FilterBar({
         <div>
           <label
             htmlFor="year-filter"
-            className="mb-1.5 block text-xs font-medium text-text-muted"
+            className="mb-1 block text-xs font-medium text-text-muted"
           >
             Year
           </label>
@@ -208,7 +208,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, year: e.target.value })
             }
-            className="w-full rounded-xl border border-border bg-surface-hover px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
+            className="w-full rounded-lg border border-border bg-surface-hover px-2.5 py-1.5 text-xs text-text-primary outline-none transition-colors focus:border-accent-primary focus:ring-1 focus:ring-accent-primary/30"
           >
             <option value="All">All Years</option>
             {years.map((y) => (

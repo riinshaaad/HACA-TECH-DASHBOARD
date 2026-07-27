@@ -16,6 +16,7 @@ interface ReasonForChoosingChartProps {
   data: ReasonDistribution[];
   activeFilter?: string;
   onSelect?: (value: string) => void;
+  title?: string;
 }
 
 const CustomTooltip = ({
@@ -31,7 +32,7 @@ const CustomTooltip = ({
     <div className="rounded-xl border border-border bg-surface-elevated px-4 py-3 shadow-xl">
       <p className="text-sm font-semibold text-text-primary">{d.reason}</p>
       <p className="text-xs text-text-secondary">
-        <span className="font-bold text-accent-primary">{d.count}</span> students
+        <span className="font-bold text-accent-purple">{d.count}</span> students
       </p>
     </div>
   );
@@ -41,6 +42,7 @@ export default function ReasonForChoosingChart({
   data,
   activeFilter,
   onSelect,
+  title,
 }: ReasonForChoosingChartProps) {
   const handleClick = (item: any) => {
     if (!onSelect) return;
@@ -74,7 +76,7 @@ export default function ReasonForChoosingChart({
             </svg>
           </div>
           <h3 className="text-sm font-semibold text-text-primary">
-            Main Reason for Choosing
+            {title || "Primary Reason for Choosing HACA"}
           </h3>
         </div>
         <div className="flex h-64 items-center justify-center">
@@ -104,7 +106,7 @@ export default function ReasonForChoosingChart({
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Main Reason for Choosing
+          {title || "Primary Reason for Choosing HACA"}
         </h3>
       </div>
       <div className="h-64">

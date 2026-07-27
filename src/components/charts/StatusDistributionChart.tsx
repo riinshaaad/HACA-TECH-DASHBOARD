@@ -16,6 +16,7 @@ interface StatusDistributionChartProps {
   data: StatusDistribution[];
   activeFilter?: string;
   onSelect?: (value: string) => void;
+  title?: string;
 }
 
 const CustomTooltip = ({
@@ -41,6 +42,7 @@ export default function StatusDistributionChart({
   data,
   activeFilter,
   onSelect,
+  title,
 }: StatusDistributionChartProps) {
   const handleClick = (item: any) => {
     if (!onSelect) return;
@@ -72,7 +74,7 @@ export default function StatusDistributionChart({
             </svg>
           </div>
           <h3 className="text-sm font-semibold text-text-primary">
-            Current Status
+            {title || "Status at Enrollment"}
           </h3>
         </div>
         <div className="flex h-64 items-center justify-center">
@@ -100,7 +102,7 @@ export default function StatusDistributionChart({
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Current Status
+          {title || "Status at Enrollment"}
         </h3>
       </div>
       <div className="h-64">
