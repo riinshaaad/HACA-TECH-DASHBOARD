@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CompetitorRank } from "@/lib/types";
 
 interface CompetitorStrategyProps {
@@ -129,6 +129,44 @@ export default function CompetitorStrategy({ data }: CompetitorStrategyProps) {
   const [editImageUrl, setEditImageUrl] = useState("");
   const [editInsights, setEditInsights] = useState<StrategyInsight[]>([]);
 
+  // Photo Gallery Lightbox state
+  const [activePhotoId, setActivePhotoId] = useState<number | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+
+  const photoStrategies = strategies.filter((s) => !!s.image);
+  const currentPhotoIndex = photoStrategies.findIndex((s) => s.id === activePhotoId);
+  const activePhoto = currentPhotoIndex !== -1 ? photoStrategies[currentPhotoIndex] : null;
+
+  const handleNextPhoto = useCallback(() => {
+    if (photoStrategies.length === 0 || currentPhotoIndex === -1) return;
+    const nextIndex = (currentPhotoIndex + 1) % photoStrategies.length;
+    setActivePhotoId(photoStrategies[nextIndex].id);
+    setZoomLevel(1);
+  }, [photoStrategies, currentPhotoIndex]);
+
+  const handlePrevPhoto = useCallback(() => {
+    if (photoStrategies.length === 0 || currentPhotoIndex === -1) return;
+    const prevIndex = (currentPhotoIndex - 1 + photoStrategies.length) % photoStrategies.length;
+    setActivePhotoId(photoStrategies[prevIndex].id);
+    setZoomLevel(1);
+  }, [photoStrategies, currentPhotoIndex]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!activePhoto) return;
+      if (e.key === "Escape") {
+        setActivePhotoId(null);
+        setZoomLevel(1);
+      } else if (e.key === "ArrowRight") {
+        handleNextPhoto();
+      } else if (e.key === "ArrowLeft") {
+        handlePrevPhoto();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activePhoto, handleNextPhoto, handlePrevPhoto]);
+
   const handleAddStrategy = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
@@ -234,6 +272,181 @@ export default function CompetitorStrategy({ data }: CompetitorStrategyProps) {
 
   return (
     <div className="space-y-10 fade-in-up" id="competitor-strategy">
+      {/* FULL-SCREEN PHOTO GALLERY LIGHTBOX MODAL */}
+      {activePhoto && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-between bg-black/90 backdrop-blur-md p-4 sm:p-6 animate-fadeIn"
+          onClick={() => {
+            setActivePhotoId(null);
+            setZoomLevel(1);
+          }}
+        >
+          {/* TOP BAR: Title, Badge, and Controls */}
+          <div
+            className="w-full max-w-6xl flex items-center justify-between gap-4 bg-black/60 border border-white/10 backdrop-blur-md px-4 py-3 rounded-2xl text-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className={`hidden sm:inline-block rounded-full px-3 py-0.5 text-xs font-semibold shrink-0 ${activePhoto.badgeColor}`}>
+                {activePhoto.badgeText}
+              </span>
+              <div className="min-w-0">
+                <h4 className="text-sm sm:text-base font-bold text-white truncate">
+                  {activePhoto.title}
+                </h4>
+                <p className="text-xs text-white/70 truncate">
+                  {activePhoto.tagline}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Zoom Out Button */}
+              <button
+                type="button"
+                onClick={() => setZoomLevel((z) => Math.max(z - 0.5, 1))}
+                disabled={zoomLevel <= 1}
+                title="Zoom out"
+                className="rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-40 p-2 text-white transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  <line x1="8" y1="11" x2="14" y2="11" />
+                </svg>
+              </button>
+
+              {/* Zoom Label / Reset Button */}
+              <button
+                type="button"
+                onClick={() => setZoomLevel(1)}
+                title="Click to reset zoom"
+                className="rounded-lg bg-white/10 hover:bg-white/20 px-2.5 py-1 text-xs font-bold text-white transition-colors min-w-[52px]"
+              >
+                {Math.round(zoomLevel * 100)}%
+              </button>
+
+              {/* Zoom In Button */}
+              <button
+                type="button"
+                onClick={() => setZoomLevel((z) => Math.min(z + 0.5, 3))}
+                disabled={zoomLevel >= 3}
+                title="Zoom in"
+                className="rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-40 p-2 text-white transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  <line x1="11" y1="8" x2="11" y2="14" />
+                  <line x1="8" y1="11" x2="14" y2="11" />
+                </svg>
+              </button>
+
+              {/* Open original file in new tab */}
+              {activePhoto.image && (
+                <a
+                  href={activePhoto.image}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Open original image in new tab"
+                  className="rounded-lg bg-white/10 hover:bg-white/20 p-2 text-white transition-colors"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </a>
+              )}
+
+              {/* Close Lightbox */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActivePhotoId(null);
+                  setZoomLevel(1);
+                }}
+                title="Close gallery (Esc)"
+                className="rounded-lg bg-red-500/80 hover:bg-red-500 p-2 text-white transition-colors ml-1"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* CENTER AREA: Image and Gallery Arrows */}
+          <div className="relative flex-1 w-full max-w-6xl flex items-center justify-center my-4 overflow-hidden">
+            {/* Prev Arrow */}
+            {photoStrategies.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrevPhoto();
+                }}
+                title="Previous photo (Left arrow key)"
+                className="absolute left-2 sm:left-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-black/70 border border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-all shadow-lg"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+            )}
+
+            {/* Fully visible photo container ("like a photo click from gallery") */}
+            <div
+              className="flex items-center justify-center w-full h-full p-2 sm:p-6 select-none overflow-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={activePhoto.image}
+                alt={activePhoto.title}
+                style={{
+                  transform: `scale(${zoomLevel})`,
+                  transition: "transform 0.25s ease-out",
+                }}
+                className="max-h-[75vh] max-w-[88vw] object-contain rounded-xl shadow-2xl bg-black/50 border border-white/10 cursor-grab active:cursor-grabbing"
+              />
+            </div>
+
+            {/* Next Arrow */}
+            {photoStrategies.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNextPhoto();
+                }}
+                title="Next photo (Right arrow key)"
+                className="absolute right-2 sm:right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-black/70 border border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-all shadow-lg"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* BOTTOM BAR: Photo Gallery Counter & Shortcuts */}
+          <div
+            className="flex items-center justify-center gap-4 bg-black/60 border border-white/10 backdrop-blur-md px-5 py-2.5 rounded-full text-xs text-white/80 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {photoStrategies.length > 1 && (
+              <span className="font-bold text-white">
+                Photo {currentPhotoIndex + 1} of {photoStrategies.length}
+              </span>
+            )}
+            <span className="text-white/70">
+              Click outside or press <kbd className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-mono text-white">ESC</kbd> to close
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* HEADER SECTION & ADD STRATEGY ACTION */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center border-b border-border/40 pb-6">
         <div>
@@ -581,18 +794,63 @@ export default function CompetitorStrategy({ data }: CompetitorStrategyProps) {
                             </svg>
                             Brochure / Promotional Evidence
                           </span>
-                          <span className="text-[11px] font-medium text-accent-primary">
-                            Hover to zoom
+                          <span
+                            onClick={() => {
+                              setActivePhotoId(strategy.id);
+                              setZoomLevel(1);
+                            }}
+                            className="flex items-center gap-1 text-[11px] font-semibold text-accent-primary hover:underline cursor-pointer"
+                          >
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M15 3h6v6" />
+                              <path d="M9 21H3v-6" />
+                              <path d="M21 3l-7 7" />
+                              <path d="M3 21l7-7" />
+                            </svg>
+                            Click to view full photo
                           </span>
                         </div>
 
                         <div
+                          onClick={() => {
+                            setActivePhotoId(strategy.id);
+                            setZoomLevel(1);
+                          }}
+                          title="Click to view full photo in gallery"
                           className={
                             strategy.id === 1
-                              ? "relative flex-1 w-full overflow-hidden rounded-xl bg-white min-h-[360px] flex items-center justify-center border border-border/40 shadow-inner"
-                              : "relative flex-1 w-full overflow-hidden rounded-xl bg-slate-950/90 min-h-[440px] flex items-center justify-center border border-border/40 shadow-inner p-3"
+                              ? "group/photo relative flex-1 w-full overflow-hidden rounded-xl bg-white min-h-[360px] flex items-center justify-center border border-border/40 shadow-inner cursor-pointer transition-all duration-300 hover:border-accent-primary/60 hover:shadow-lg hover:shadow-accent-primary/10"
+                              : "group/photo relative flex-1 w-full overflow-hidden rounded-xl bg-slate-950/90 min-h-[440px] flex items-center justify-center border border-border/40 shadow-inner p-3 cursor-pointer transition-all duration-300 hover:border-accent-primary/60 hover:shadow-lg hover:shadow-accent-primary/10"
                           }
                         >
+                          <div className="absolute right-3 bottom-3 z-10 flex items-center gap-1.5 rounded-full bg-black/75 backdrop-blur-md px-3 py-1.5 text-xs font-semibold text-white shadow-lg border border-white/15 opacity-90 group-hover/photo:opacity-100 group-hover/photo:scale-105 transition-all">
+                            <svg
+                              width="13"
+                              height="13"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M15 3h6v6" />
+                              <path d="M9 21H3v-6" />
+                              <path d="M21 3l-7 7" />
+                              <path d="M3 21l7-7" />
+                            </svg>
+                            View Full Photo
+                          </div>
+
                           <img
                             src={strategy.image}
                             alt={strategy.title}
