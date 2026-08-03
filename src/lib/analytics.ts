@@ -30,27 +30,37 @@ export function applyFilters(
   filters: FilterState
 ): EnrollmentData[] {
   return data.filter((d) => {
-    if (filters.course !== "All" && d.course !== filters.course) return false;
-    if (filters.district !== "All" && d.district !== filters.district)
-      return false;
-    if (
-      filters.currentStatus !== "All" &&
-      d.currentStatus !== filters.currentStatus
-    )
-      return false;
-    if (filters.batch !== "All" && d.batchName !== filters.batch) return false;
-    if (filters.month !== "All" || filters.year !== "All") {
+    // Helper to check if item value matches filter
+    const matchesFilter = (filterVal: string | string[] | undefined, itemVal: string) => {
+      if (!filterVal || filterVal === "All") return true;
+      if (Array.isArray(filterVal)) {
+        if (filterVal.includes("All") || filterVal.length === 0) return true;
+        return filterVal.includes(itemVal);
+      }
+      return itemVal === filterVal;
+    };
+
+    if (!matchesFilter(filters.course, d.course)) return false;
+    if (!matchesFilter(filters.district, d.district)) return false;
+    if (!matchesFilter(filters.currentStatus, d.currentStatus)) return false;
+    if (!matchesFilter(filters.batch, d.batchName)) return false;
+
+    const selectedMonths = Array.isArray(filters.month) ? filters.month : [filters.month];
+    const hasMonthFilter = selectedMonths.length > 0 && !selectedMonths.includes("All");
+    const selectedYears = Array.isArray(filters.year) ? filters.year : [filters.year];
+    const hasYearFilter = selectedYears.length > 0 && !selectedYears.includes("All");
+
+    if (hasMonthFilter || hasYearFilter) {
       if (!d.enrollmentDate) return false;
       const parts = d.enrollmentDate.split("/");
       if (parts.length === 3) {
-        if (filters.month !== "All") {
+        if (hasMonthFilter) {
           const monthNum = parseInt(parts[1], 10).toString();
-          if (monthNum !== filters.month) return false;
+          if (!selectedMonths.includes(monthNum)) return false;
         }
-        if (filters.year !== "All") {
-          // year might have time attached, e.g. "2025 14:30:00"
+        if (hasYearFilter) {
           const yearStr = parts[2].trim().split(" ")[0];
-          if (yearStr !== filters.year) return false;
+          if (!selectedYears.includes(yearStr)) return false;
         }
       } else {
         return false;

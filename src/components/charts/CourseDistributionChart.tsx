@@ -11,7 +11,7 @@ import { CourseDistribution } from "@/lib/types";
 
 interface CourseDistributionChartProps {
   data: CourseDistribution[];
-  activeFilter?: string;
+  activeFilter?: string | string[];
   onSelect?: (value: string) => void;
   title?: string;
 }
@@ -49,7 +49,11 @@ export default function CourseDistributionChart({
     const val =
       typeof item === "string" ? item : item?.course || item?.payload?.course;
     if (val) {
-      onSelect(activeFilter === val ? "All" : val);
+      if (Array.isArray(activeFilter)) {
+        onSelect(activeFilter.includes(val) && activeFilter.length === 1 ? "All" : val);
+      } else {
+        onSelect(activeFilter === val ? "All" : val);
+      }
     }
   };
 
@@ -126,16 +130,19 @@ export default function CourseDistributionChart({
                   const isSelected =
                     !activeFilter ||
                     activeFilter === "All" ||
-                    activeFilter === entry.course;
+                    (Array.isArray(activeFilter)
+                      ? activeFilter.includes("All") || activeFilter.includes(entry.course) || activeFilter.length === 0
+                      : activeFilter === entry.course);
+                  const isStroke = Array.isArray(activeFilter)
+                    ? activeFilter.includes(entry.course) && !activeFilter.includes("All")
+                    : activeFilter === entry.course && activeFilter !== "All";
                   return (
                     <Cell
                       key={i}
                       fill={entry.fill}
                       opacity={isSelected ? 1 : 0.35}
-                      stroke={
-                        activeFilter === entry.course ? "#ffffff" : "none"
-                      }
-                      strokeWidth={activeFilter === entry.course ? 2 : 0}
+                      stroke={isStroke ? "#ffffff" : "none"}
+                      strokeWidth={isStroke ? 2 : 0}
                       onClick={() => handleClick(entry.course)}
                       className="cursor-pointer transition-all duration-200"
                     />
@@ -149,11 +156,14 @@ export default function CourseDistributionChart({
 
         <div className="grid flex-1 min-w-0 grid-cols-1 md:grid-cols-2 gap-2 max-h-[260px] overflow-y-auto custom-scrollbar pr-1">
           {data.map((course) => {
-            const isSelected = activeFilter === course.course;
+            const isSelected = Array.isArray(activeFilter)
+              ? activeFilter.includes(course.course) && !activeFilter.includes("All")
+              : activeFilter === course.course;
             const isDimmed =
               activeFilter &&
-              activeFilter !== "All" &&
-              activeFilter !== course.course;
+              (Array.isArray(activeFilter)
+                ? !activeFilter.includes("All") && !activeFilter.includes(course.course) && activeFilter.length > 0
+                : activeFilter !== "All" && activeFilter !== course.course);
             return (
               <div
                 key={course.course}

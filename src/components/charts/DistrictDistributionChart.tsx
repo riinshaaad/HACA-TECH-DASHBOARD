@@ -14,7 +14,7 @@ import { DistrictDistribution } from "@/lib/types";
 
 interface DistrictDistributionChartProps {
   data: DistrictDistribution[];
-  activeFilter?: string;
+  activeFilter?: string | string[];
   onSelect?: (value: string) => void;
   title?: string;
 }
@@ -54,7 +54,11 @@ export default function DistrictDistributionChart({
         ? item
         : item?.district || item?.payload?.district;
     if (val) {
-      onSelect(activeFilter === val ? "All" : val);
+      if (Array.isArray(activeFilter)) {
+        onSelect(activeFilter.includes(val) && activeFilter.length === 1 ? "All" : val);
+      } else {
+        onSelect(activeFilter === val ? "All" : val);
+      }
     }
   };
 
@@ -150,16 +154,19 @@ export default function DistrictDistributionChart({
                   const isSelected =
                     !activeFilter ||
                     activeFilter === "All" ||
-                    activeFilter === entry.district;
+                    (Array.isArray(activeFilter)
+                      ? activeFilter.includes("All") || activeFilter.includes(entry.district) || activeFilter.length === 0
+                      : activeFilter === entry.district);
+                  const isStroke = Array.isArray(activeFilter)
+                    ? activeFilter.includes(entry.district) && !activeFilter.includes("All")
+                    : activeFilter === entry.district && activeFilter !== "All";
                   return (
                     <Cell
                       key={i}
                       fill={entry.fill}
                       opacity={isSelected ? 1 : 0.35}
-                      stroke={
-                        activeFilter === entry.district ? "#ffffff" : "none"
-                      }
-                      strokeWidth={activeFilter === entry.district ? 2 : 0}
+                      stroke={isStroke ? "#ffffff" : "none"}
+                      strokeWidth={isStroke ? 2 : 0}
                       onClick={() => handleClick(entry.district)}
                       className="cursor-pointer transition-all duration-200"
                     />

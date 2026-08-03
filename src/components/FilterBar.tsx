@@ -1,6 +1,7 @@
 "use client";
 
 import { FilterState, MonthOption } from "@/lib/types";
+import MultiSelect from "./MultiSelect";
 
 interface FilterBarProps {
   filters: FilterState;
@@ -23,9 +24,12 @@ export default function FilterBar({
   batches,
   years,
 }: FilterBarProps) {
-  const hasActiveFilters = Object.values(filters).some(
-    (val) => val && val !== "All"
-  );
+  const hasActiveFilters = Object.values(filters).some((val) => {
+    if (Array.isArray(val)) {
+      return val.length > 0 && !val.includes("All");
+    }
+    return val && val !== "All";
+  });
 
   const chartFilters = [
     { key: "gender", label: "Gender", value: filters.gender },
@@ -55,21 +59,14 @@ export default function FilterBar({
     },
   ];
 
-  const getSelectClassName = (isActive: boolean) =>
-    `h-7 rounded-lg border px-2.5 py-0.5 text-xs font-medium outline-none transition-all cursor-pointer ${
-      isActive
-        ? "border-accent-primary bg-accent-primary/15 font-semibold text-accent-primary shadow-sm"
-        : "border-border/70 bg-surface-hover text-text-primary hover:border-border"
-    }`;
-
   const resetAllFilters = () =>
     onFilterChange({
-      course: "All",
-      district: "All",
-      currentStatus: "All",
-      month: "All",
-      batch: "All",
-      year: "All",
+      course: ["All"],
+      district: ["All"],
+      currentStatus: ["All"],
+      month: ["All"],
+      batch: ["All"],
+      year: ["All"],
       gender: "All",
       ageGroup: "All",
       leadSource: "All",
@@ -83,7 +80,7 @@ export default function FilterBar({
 
   return (
     <div
-      className="fade-in-up flex flex-wrap items-center gap-2 rounded-xl border border-accent-primary/20 bg-gradient-to-r from-accent-primary/10 via-surface-elevated/80 to-accent-primary/5 px-3 py-2 shadow-sm backdrop-blur-md"
+      className="relative z-30 fade-in-up flex flex-wrap items-center gap-2 rounded-xl border border-accent-primary/20 bg-gradient-to-r from-accent-primary/10 via-surface-elevated/80 to-accent-primary/5 px-3 py-2 shadow-sm backdrop-blur-md"
       id="filter-bar"
     >
       {/* Slicers Label */}
@@ -105,118 +102,58 @@ export default function FilterBar({
       </div>
 
       {/* Course Slicer */}
-      <select
-        id="course-filter"
-        title="Course"
-        aria-label="Course"
-        value={filters.course}
-        onChange={(e) =>
-          onFilterChange({ ...filters, course: e.target.value })
-        }
-        className={getSelectClassName(filters.course !== "All")}
-      >
-        <option value="All">All Courses</option>
-        {courses.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
-      </select>
+      <MultiSelect
+        label="Course"
+        placeholder="All Courses"
+        options={courses.map((c) => ({ label: c, value: c }))}
+        selectedValues={filters.course}
+        onChange={(vals) => onFilterChange({ ...filters, course: vals })}
+      />
 
       {/* District Slicer */}
-      <select
-        id="district-filter"
-        title="District"
-        aria-label="District"
-        value={filters.district}
-        onChange={(e) =>
-          onFilterChange({ ...filters, district: e.target.value })
-        }
-        className={getSelectClassName(filters.district !== "All")}
-      >
-        <option value="All">All Districts</option>
-        {districts.map((d) => (
-          <option key={d} value={d}>
-            {d}
-          </option>
-        ))}
-      </select>
+      <MultiSelect
+        label="District"
+        placeholder="All Districts"
+        options={districts.map((d) => ({ label: d, value: d }))}
+        selectedValues={filters.district}
+        onChange={(vals) => onFilterChange({ ...filters, district: vals })}
+      />
 
       {/* Current Status Slicer */}
-      <select
-        id="status-filter"
-        title="Current Status"
-        aria-label="Current Status"
-        value={filters.currentStatus}
-        onChange={(e) =>
-          onFilterChange({ ...filters, currentStatus: e.target.value })
-        }
-        className={getSelectClassName(filters.currentStatus !== "All")}
-      >
-        <option value="All">All Statuses</option>
-        {statuses.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </select>
+      <MultiSelect
+        label="Status"
+        placeholder="All Statuses"
+        options={statuses.map((s) => ({ label: s, value: s }))}
+        selectedValues={filters.currentStatus}
+        onChange={(vals) => onFilterChange({ ...filters, currentStatus: vals })}
+      />
 
       {/* Month Slicer */}
-      <select
-        id="month-filter"
-        title="Month"
-        aria-label="Month"
-        value={filters.month}
-        onChange={(e) =>
-          onFilterChange({ ...filters, month: e.target.value })
-        }
-        className={getSelectClassName(filters.month !== "All")}
-      >
-        <option value="All">All Months</option>
-        {months.map((m) => (
-          <option key={m.value} value={m.value}>
-            {m.label}
-          </option>
-        ))}
-      </select>
+      <MultiSelect
+        label="Month"
+        placeholder="All Months"
+        options={months.map((m) => ({ label: m.label, value: m.value }))}
+        selectedValues={filters.month}
+        onChange={(vals) => onFilterChange({ ...filters, month: vals })}
+      />
 
       {/* Batch Slicer */}
-      <select
-        id="batch-filter"
-        title="Batch"
-        aria-label="Batch"
-        value={filters.batch}
-        onChange={(e) =>
-          onFilterChange({ ...filters, batch: e.target.value })
-        }
-        className={getSelectClassName(filters.batch !== "All")}
-      >
-        <option value="All">All Batches</option>
-        {batches.map((b) => (
-          <option key={b} value={b}>
-            {b}
-          </option>
-        ))}
-      </select>
+      <MultiSelect
+        label="Batch"
+        placeholder="All Batches"
+        options={batches.map((b) => ({ label: b, value: b }))}
+        selectedValues={filters.batch}
+        onChange={(vals) => onFilterChange({ ...filters, batch: vals })}
+      />
 
       {/* Year Slicer */}
-      <select
-        id="year-filter"
-        title="Year"
-        aria-label="Year"
-        value={filters.year}
-        onChange={(e) =>
-          onFilterChange({ ...filters, year: e.target.value })
-        }
-        className={getSelectClassName(filters.year !== "All")}
-      >
-        <option value="All">All Years</option>
-        {years.map((y) => (
-          <option key={y} value={y}>
-            {y}
-          </option>
-        ))}
-      </select>
+      <MultiSelect
+        label="Year"
+        placeholder="All Years"
+        options={years.map((y) => ({ label: y, value: y }))}
+        selectedValues={filters.year}
+        onChange={(vals) => onFilterChange({ ...filters, year: vals })}
+      />
 
       {/* Active Chart Cross-Filter Slicers */}
       {chartFilters.map(

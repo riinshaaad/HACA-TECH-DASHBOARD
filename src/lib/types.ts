@@ -148,12 +148,12 @@ export interface ComprehensiveInsight {
 }
 
 export interface FilterState {
-  course: string;
-  district: string;
-  currentStatus: string;
-  month: string;
-  batch: string;
-  year: string;
+  course: string | string[];
+  district: string | string[];
+  currentStatus: string | string[];
+  month: string | string[];
+  batch: string | string[];
+  year: string | string[];
   gender?: string;
   ageGroup?: string;
   leadSource?: string;

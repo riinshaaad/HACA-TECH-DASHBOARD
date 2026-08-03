@@ -14,7 +14,7 @@ import { StatusDistribution } from "@/lib/types";
 
 interface StatusDistributionChartProps {
   data: StatusDistribution[];
-  activeFilter?: string;
+  activeFilter?: string | string[];
   onSelect?: (value: string) => void;
   title?: string;
 }
@@ -51,7 +51,11 @@ export default function StatusDistributionChart({
         ? item
         : item?.status || item?.payload?.status;
     if (val) {
-      onSelect(activeFilter === val ? "All" : val);
+      if (Array.isArray(activeFilter)) {
+        onSelect(activeFilter.includes(val) && activeFilter.length === 1 ? "All" : val);
+      } else {
+        onSelect(activeFilter === val ? "All" : val);
+      }
     }
   };
 
@@ -139,16 +143,19 @@ export default function StatusDistributionChart({
                 const isSelected =
                   !activeFilter ||
                   activeFilter === "All" ||
-                  activeFilter === entry.status;
+                  (Array.isArray(activeFilter)
+                    ? activeFilter.includes("All") || activeFilter.includes(entry.status) || activeFilter.length === 0
+                    : activeFilter === entry.status);
+                const isStroke = Array.isArray(activeFilter)
+                  ? activeFilter.includes(entry.status) && !activeFilter.includes("All")
+                  : activeFilter === entry.status && activeFilter !== "All";
                 return (
                   <Cell
                     key={i}
                     fill={entry.fill}
                     opacity={isSelected ? 1 : 0.35}
-                    stroke={
-                      activeFilter === entry.status ? "#ffffff" : "none"
-                    }
-                    strokeWidth={activeFilter === entry.status ? 2 : 0}
+                    stroke={isStroke ? "#ffffff" : "none"}
+                    strokeWidth={isStroke ? 2 : 0}
                     onClick={() => handleClick(entry.status)}
                     className="cursor-pointer transition-all duration-200"
                   />
