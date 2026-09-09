@@ -16,6 +16,8 @@ import {
   computeSeenAdsDistribution,
   computeAIInfluenceDistribution,
   computeReasonForChoosingDistribution,
+  computeReviewFrequencyDistribution,
+  computeResponseToReviewsDistribution,
   computeTrends,
   computeCompetitorMentions,
   getUniqueCourses,
@@ -42,6 +44,8 @@ import InfluencingContentChart from "@/components/charts/InfluencingContentChart
 import AIInfluenceChart from "@/components/charts/AIInfluenceChart";
 import SeenAdsChart from "@/components/charts/SeenAdsChart";
 import ReasonForChoosingChart from "@/components/charts/ReasonForChoosingChart";
+import ReviewFrequencyChart from "@/components/charts/ReviewFrequencyChart";
+import ResponseToReviewsChart from "@/components/charts/ResponseToReviewsChart";
 import RespondentList from "@/components/RespondentList";
 import CompetitorMentions from "@/components/CompetitorMentions";
 import CompetitorStrategy from "@/components/CompetitorStrategy";
@@ -65,6 +69,8 @@ const defaultChartOrder = [
   "aiInfluence",
   "reason",
   "leadSource",
+  "reviewFrequency",
+  "responseToReviews",
 ];
 
 const defaultChartTitles: Record<string, string> = {
@@ -80,6 +86,8 @@ const defaultChartTitles: Record<string, string> = {
   aiInfluence: "Chose HACA Due to AI Integration?",
   reason: "Primary Reason for Choosing HACA",
   leadSource: "Primary Lead Source",
+  reviewFrequency: "How Often Do Reviews by Other Leads Influence Joining HACA?",
+  responseToReviews: "What Was Your Response to the Reviews?",
 };
 
 type ChartSize = "col-span-1" | "col-span-2" | "col-span-3";
@@ -97,6 +105,8 @@ const defaultChartSizes: Record<string, ChartSize> = {
   aiInfluence: "col-span-1",
   reason: "col-span-1",
   leadSource: "col-span-1",
+  reviewFrequency: "col-span-1",
+  responseToReviews: "col-span-1",
 };
 
 const defaultChartHeights: Record<string, number> = {
@@ -112,6 +122,8 @@ const defaultChartHeights: Record<string, number> = {
   aiInfluence: 360,
   reason: 360,
   leadSource: 360,
+  reviewFrequency: 360,
+  responseToReviews: 360,
 };
 
 export default function DashboardClient({ data }: DashboardClientProps) {
@@ -140,6 +152,8 @@ export default function DashboardClient({ data }: DashboardClientProps) {
   const aiInfluence = useMemo(() => computeAIInfluenceDistribution(filteredData), [filteredData]);
   const influencingContent = useMemo(() => computeInfluencingContentDistribution(filteredData), [filteredData]);
   const reasonForChoosingDist = useMemo(() => computeReasonForChoosingDistribution(filteredData), [filteredData]);
+  const reviewFrequencyDist = useMemo(() => computeReviewFrequencyDistribution(filteredData), [filteredData]);
+  const responseToReviewsDist = useMemo(() => computeResponseToReviewsDistribution(filteredData), [filteredData]);
 
   // Insights and benchmarks use full data
   const fullKPIs = useMemo(() => computeKPIs(data), [data]);
@@ -436,6 +450,28 @@ export default function DashboardClient({ data }: DashboardClientProps) {
             activeFilter={filters.leadSource}
             onSelect={(val) =>
               setFilters((prev) => ({ ...prev, leadSource: val }))
+            }
+            title={title}
+          />
+        );
+      case "reviewFrequency":
+        return (
+          <ReviewFrequencyChart
+            data={reviewFrequencyDist}
+            activeFilter={filters.reviewFrequency}
+            onSelect={(val) =>
+              setFilters((prev) => ({ ...prev, reviewFrequency: val }))
+            }
+            title={title}
+          />
+        );
+      case "responseToReviews":
+        return (
+          <ResponseToReviewsChart
+            data={responseToReviewsDist}
+            activeFilter={filters.responseToReviews}
+            onSelect={(val) =>
+              setFilters((prev) => ({ ...prev, responseToReviews: val }))
             }
             title={title}
           />

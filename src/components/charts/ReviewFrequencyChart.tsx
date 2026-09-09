@@ -1,11 +1,14 @@
 "use client";
 
 import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
+  ResponsiveContainer,
+  Cell,
 } from "recharts";
 import { ReviewFrequencyDistribution } from "@/lib/types";
 
@@ -13,6 +16,7 @@ interface ReviewFrequencyChartProps {
   data: ReviewFrequencyDistribution[];
   activeFilter?: string;
   onSelect?: (value: string) => void;
+  title?: string;
 }
 
 const CustomTooltip = ({
@@ -40,6 +44,7 @@ export default function ReviewFrequencyChart({
   data,
   activeFilter,
   onSelect,
+  title,
 }: ReviewFrequencyChartProps) {
   const handleClick = (item: any) => {
     if (!onSelect) return;
@@ -51,6 +56,8 @@ export default function ReviewFrequencyChart({
       onSelect(activeFilter === val ? "All" : val);
     }
   };
+
+  const chartTitle = title || "How Often Do Reviews by Other Leads Influence Joining HACA?";
 
   if (data.length === 0) {
     return (
@@ -72,7 +79,7 @@ export default function ReviewFrequencyChart({
             </svg>
           </div>
           <h3 className="text-sm font-semibold text-text-primary">
-            Frequency of Reading Reviews
+            {chartTitle}
           </h3>
         </div>
         <div className="flex h-56 items-center justify-center">
@@ -101,86 +108,58 @@ export default function ReviewFrequencyChart({
           </svg>
         </div>
         <h3 className="text-sm font-semibold text-text-primary">
-          Frequency of Reading Reviews
+          {chartTitle}
         </h3>
       </div>
 
-      <div className="flex flex-row items-center justify-between gap-4 w-full flex-1 py-2">
-        <div className="h-48 w-48 sm:h-52 sm:w-52 flex-shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={80}
-                paddingAngle={3}
-                dataKey="count"
-                strokeWidth={0}
-                onClick={handleClick}
-                className="cursor-pointer"
-              >
-                {data.map((entry, i) => {
-                  const isSelected =
-                    !activeFilter ||
-                    activeFilter === "All" ||
-                    activeFilter === entry.answer;
-                  return (
-                    <Cell
-                      key={i}
-                      fill={entry.fill}
-                      opacity={isSelected ? 1 : 0.35}
-                      stroke={
-                        activeFilter === entry.answer ? "#ffffff" : "none"
-                      }
-                      strokeWidth={activeFilter === entry.answer ? 2 : 0}
-                      onClick={() => handleClick(entry.answer)}
-                      className="cursor-pointer transition-all duration-200"
-                    />
-                  );
-                })}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="grid flex-1 min-w-0 grid-cols-1 md:grid-cols-2 gap-2 max-h-[260px] overflow-y-auto custom-scrollbar pr-1">
-          {data.map((item) => {
-            const isSelected = activeFilter === item.answer;
-            const isDimmed =
-              activeFilter &&
-              activeFilter !== "All" &&
-              activeFilter !== item.answer;
-            return (
-              <div
-                key={item.answer}
-                onClick={() => handleClick(item.answer)}
-                className={`cursor-pointer flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 transition-all shadow-sm hover:scale-[1.02] ${
-                  isSelected
-                    ? "bg-accent-primary/25 border-accent-primary shadow-md font-bold ring-1 ring-accent-primary/50"
-                    : isDimmed
-                    ? "bg-surface-hover/15 border-border/20 opacity-40 hover:opacity-75"
-                    : "bg-surface/50 border-border/40 hover:bg-surface-hover hover:border-border"
-                }`}
-              >
-                <span
-                  className="h-3 w-3 flex-shrink-0 rounded-full shadow-sm"
-                  style={{ backgroundColor: item.fill }}
-                />
-                <div className="flex flex-1 items-center justify-between min-w-0 gap-2">
-                  <p className="truncate text-sm font-medium text-text-primary">
-                    {item.answer}
-                  </p>
-                  <p className="text-xs font-bold text-text-secondary">
-                    {item.count}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <div className="h-56">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis
+              dataKey="answer"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: "#64748b" }}
+            />
+            <YAxis
+              type="number"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11, fill: "#94a3b8" }}
+              allowDecimals={false}
+            />
+            <Tooltip
+              content={<CustomTooltip />}
+              cursor={{ fill: "rgba(123, 92, 250, 0.05)" }}
+            />
+            <Bar
+              dataKey="count"
+              radius={[8, 8, 2, 2]}
+              maxBarSize={45}
+              onClick={handleClick}
+              className="cursor-pointer"
+            >
+              {data.map((entry, i) => {
+                const isSelected =
+                  !activeFilter ||
+                  activeFilter === "All" ||
+                  activeFilter === entry.answer;
+                return (
+                  <Cell
+                    key={i}
+                    fill={entry.fill}
+                    opacity={isSelected ? 1 : 0.35}
+                    stroke={activeFilter === entry.answer ? "#ffffff" : "none"}
+                    strokeWidth={activeFilter === entry.answer ? 2 : 0}
+                    onClick={() => handleClick(entry.answer)}
+                    className="cursor-pointer transition-all duration-200"
+                  />
+                );
+              })}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ import {
   SeenAdsDistribution,
   AIInfluenceDistribution,
   ReviewFrequencyDistribution,
+  ResponseToReviewsDistribution,
   ReasonDistribution,
   LeadSourceDistribution,
   TrendPoint,
@@ -151,11 +152,29 @@ export function applyFilters(
       if (reason !== filters.reasonForChoosingInstitute) return false;
     }
     if (filters.reviewFrequency && filters.reviewFrequency !== "All") {
-      let answer = (d.reviewFrequency || "Unknown").trim();
-      if (answer !== "Unknown" && answer !== "") {
-        answer = answer.charAt(0).toUpperCase() + answer.slice(1);
+      const raw = (d.reviewFrequency || "").trim().toLowerCase();
+      let answer = "Unknown";
+      if (raw.includes("always")) answer = "Always";
+      else if (raw.includes("often")) answer = "Often";
+      else if (raw.includes("sometimes") || raw.includes("some time")) answer = "Sometimes";
+      else if (raw.includes("rarely") || raw.includes("rare")) answer = "Rarely";
+      else if (raw.includes("never")) answer = "Never";
+      else if (raw) {
+        answer = raw.charAt(0).toUpperCase() + raw.slice(1);
       }
       if (answer !== filters.reviewFrequency) return false;
+    }
+    if (filters.responseToReviews && filters.responseToReviews !== "All") {
+      const raw = (d.response || "").trim().toLowerCase();
+      let resp = "Unknown";
+      if (raw.includes("positive") || raw.includes("pos")) resp = "Positive";
+      else if (raw.includes("neutral") || raw.includes("neu")) resp = "Neutral";
+      else if (raw.includes("negative") || raw.includes("neg")) resp = "Negative";
+      else if (raw.includes("nill") || raw.includes("nil") || raw.includes("none") || raw.includes("na")) resp = "Nill";
+      else if (raw) {
+        resp = raw.charAt(0).toUpperCase() + raw.slice(1);
+      }
+      if (resp !== filters.responseToReviews) return false;
     }
     return true;
   });
@@ -540,29 +559,75 @@ export function computeAIInfluenceDistribution(
 export function computeReviewFrequencyDistribution(
   data: EnrollmentData[]
 ): ReviewFrequencyDistribution[] {
-  const counts: Record<string, number> = {};
-  data.forEach((d) => {
-    let answer = d.reviewFrequency || "Unknown";
-    answer = answer.trim();
+  const categories = ["Always", "Often", "Sometimes", "Rarely", "Never"];
+  const counts: Record<string, number> = {
+    Always: 0,
+    Often: 0,
+    Sometimes: 0,
+    Rarely: 0,
+    Never: 0,
+  };
 
-    if (answer !== "Unknown" && answer !== "") {
-      // Normalize simple strings if needed
-      answer = answer.charAt(0).toUpperCase() + answer.slice(1);
-      counts[answer] = (counts[answer] || 0) + 1;
+  data.forEach((d) => {
+    const raw = (d.reviewFrequency || "").trim().toLowerCase();
+    if (!raw) return;
+
+    if (raw.includes("always")) counts["Always"]++;
+    else if (raw.includes("often")) counts["Often"]++;
+    else if (raw.includes("sometimes") || raw.includes("some time")) counts["Sometimes"]++;
+    else if (raw.includes("rarely") || raw.includes("rare")) counts["Rarely"]++;
+    else if (raw.includes("never")) counts["Never"]++;
+    else {
+      const match = categories.find((c) => c.toLowerCase() === raw);
+      if (match) counts[match]++;
     }
   });
 
-  return Object.entries(counts)
-    .sort((a, b) => b[1] - a[1]) // Sort largest first
-    .slice(0, 5) // Top 5
-    .map(([answer, count], i) => {
-      let fill = BAR_COLORS[i % 2];
-      return {
-        answer,
-        count,
-        fill,
-      };
-    });
+  return categories.map((answer, i) => ({
+    answer,
+    count: counts[answer] || 0,
+    fill: BAR_COLORS[i % 2],
+  }));
+}
+
+// ─── Response to Reviews ───────────────────────────────────────────
+export function computeResponseToReviewsDistribution(
+  data: EnrollmentData[]
+): ResponseToReviewsDistribution[] {
+  const categories = ["Positive", "Neutral", "Negative", "Nill"];
+  const counts: Record<string, number> = {
+    Positive: 0,
+    Neutral: 0,
+    Negative: 0,
+    Nill: 0,
+  };
+
+  const RESPONSE_COLORS: Record<string, string> = {
+    Positive: "#10b981", // Emerald
+    Neutral: "#06b6d4",  // Cyan
+    Negative: "#ef4444", // Red
+    Nill: "#9ca3af",     // Gray
+  };
+
+  data.forEach((d) => {
+    const raw = (d.response || "").trim().toLowerCase();
+    if (!raw) return;
+
+    if (raw.includes("positive") || raw.includes("pos")) counts["Positive"]++;
+    else if (raw.includes("neutral") || raw.includes("neu")) counts["Neutral"]++;
+    else if (raw.includes("negative") || raw.includes("neg")) counts["Negative"]++;
+    else if (raw.includes("nill") || raw.includes("nil") || raw.includes("none") || raw.includes("na")) counts["Nill"]++;
+    else {
+      const match = categories.find((c) => c.toLowerCase() === raw);
+      if (match) counts[match]++;
+    }
+  });
+
+  return categories.map((resp) => ({
+    response: resp,
+    count: counts[resp] || 0,
+    fill: RESPONSE_COLORS[resp] || "#7B5CFA",
+  }));
 }
 
 // ─── Reason for Choosing ───────────────────────────────────────────

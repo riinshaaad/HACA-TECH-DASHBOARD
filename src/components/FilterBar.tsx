@@ -57,6 +57,11 @@ export default function FilterBar({
       label: "Review Freq",
       value: filters.reviewFrequency,
     },
+    {
+      key: "responseToReviews",
+      label: "Response",
+      value: filters.responseToReviews,
+    },
   ];
 
   const resetAllFilters = () =>
@@ -76,6 +81,7 @@ export default function FilterBar({
       choseDueToAI: "All",
       reasonForChoosingInstitute: "All",
       reviewFrequency: "All",
+      responseToReviews: "All",
     });
 
   return (

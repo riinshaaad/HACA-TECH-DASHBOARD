@@ -96,6 +96,12 @@ export interface ReviewFrequencyDistribution {
   fill: string;
 }
 
+export interface ResponseToReviewsDistribution {
+  response: string;
+  count: number;
+  fill: string;
+}
+
 export interface ReasonDistribution {
   reason: string;
   count: number;
@@ -163,6 +169,7 @@ export interface FilterState {
   choseDueToAI?: string;
   reasonForChoosingInstitute?: string;
   reviewFrequency?: string;
+  responseToReviews?: string;
 }
 
 export interface MonthOption {
