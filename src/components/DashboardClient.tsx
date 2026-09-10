@@ -155,10 +155,10 @@ export default function DashboardClient({ data }: DashboardClientProps) {
   const reviewFrequencyDist = useMemo(() => computeReviewFrequencyDistribution(filteredData), [filteredData]);
   const responseToReviewsDist = useMemo(() => computeResponseToReviewsDistribution(filteredData), [filteredData]);
 
-  // Insights and benchmarks use full data
+  // Insights and benchmarks — use filteredData so filters apply across all tabs
   const fullKPIs = useMemo(() => computeKPIs(data), [data]);
-  const competitorRank = useMemo(() => computeCompetitorMentions(data), [data]);
-  const insights = useMemo(() => generateInsights(data, fullKPIs), [data, fullKPIs]);
+  const competitorRank = useMemo(() => computeCompetitorMentions(filteredData), [filteredData]);
+  const insights = useMemo(() => generateInsights(filteredData, fullKPIs), [filteredData, fullKPIs]);
 
   const courses = useMemo(() => getUniqueCourses(data), [data]);
   const districts = useMemo(() => getUniqueDistricts(data), [data]);
@@ -824,6 +824,33 @@ export default function DashboardClient({ data }: DashboardClientProps) {
                 Insights into student acquisition and competitor comparisons
               </p>
             </div>
+
+            {/* Filters — shared with Tab 1 */}
+            <FilterBar
+              filters={filters}
+              onFilterChange={setFilters}
+              courses={courses}
+              districts={districts}
+              statuses={statuses}
+              months={months}
+              batches={batches}
+              years={years}
+            />
+
+            {/* Active-filter banner */}
+            {Object.values(filters).some((val) => val && val !== "All" && !(Array.isArray(val) && (val.includes("All") || val.length === 0))) && (
+              <div className="fade-in-up rounded-xl border border-accent-primary/20 bg-accent-primary/5 px-4 py-3 text-center text-sm text-text-secondary">
+                Showing{" "}
+                <span className="font-bold text-accent-primary">
+                  {filteredData.length}
+                </span>{" "}
+                of{" "}
+                <span className="font-bold text-text-primary">
+                  {data.length}
+                </span>{" "}
+                enrollments with active filters — competitor & insights data reflects this selection
+              </div>
+            )}
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Competitor Chart */}
